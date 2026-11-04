@@ -8,3 +8,6 @@ profiles:
     libraries:
       - PubSubClient (2.8.0)
       - ArduinoJson (7.4.3)
+      - DHT sensor library (1.4.7)
+      - Adafruit Unified Sensor (1.1.15)
+      - NewPing (1.9.7)

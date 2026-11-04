@@ -1,5 +1,5 @@
 #include "comms.h"
-#include "pins.h"
+#include "components/ComponentManager.h"
 
 static WiFiClient espClient;
 static PubSubClient client(espClient);
@@ -94,27 +94,19 @@ void callback(char *topic, byte *payload, unsigned int length) {
   switch (cstring[1]) {
   case 'R':
     Serial.println("\tRojo");
-    digitalWrite(LED1, LOW);
-    digitalWrite(LED2, HIGH);
-    digitalWrite(LED3, HIGH);
+    ComponentManager::led.setRed();
     break;
   case 'G':
     Serial.println("\tVerde");
-    digitalWrite(LED1, HIGH);
-    digitalWrite(LED2, LOW);
-    digitalWrite(LED3, HIGH);
+    ComponentManager::led.setGreen();
     break;
   case 'B':
     Serial.println("\tAzul");
-    digitalWrite(LED1, HIGH);
-    digitalWrite(LED2, HIGH);
-    digitalWrite(LED3, LOW);
+    ComponentManager::led.setBlue();
     break;
   case 'X':
     Serial.println("\tAPAGAR todo!");
-    digitalWrite(LED1, HIGH);
-    digitalWrite(LED2, HIGH);
-    digitalWrite(LED3, HIGH);
+    ComponentManager::led.setOff();
     break;
   default:
     break;

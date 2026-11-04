@@ -96,7 +96,12 @@ Go to `Tools > Board > Boards Manager` then select "esp8266"
 or add `http://arduino.esp8266.com/stable/package_esp8266com_index.json` to `File > Preferences > Additional boards manager URLs`
 
 ### Libraries
-From `Tools > Manage Libraries` add **PubSubClient** and **ArduinoJson**
+From `Tools > Manage Libraries` add:
+  - PubSubClient (2.8.0)
+  - ArduinoJson (7.4.3)
+  - DHT sensor library (1.4.7)
+  - Adafruit Unified Sensor (1.1.15)
+  - NewPing (1.9.7)
 
 ## Building and uploading
 Open the project and go to `Tools > Board > ESP8266 Boards` then select ESP8266 board; for example: `NodeMCU 1.0 (ESP-12E Module)`
