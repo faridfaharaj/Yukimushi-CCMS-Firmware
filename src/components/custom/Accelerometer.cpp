@@ -6,30 +6,28 @@ Accelerometer::Accelerometer(uint8_t analog_pin, uint8_t multiplexA,
     : Component<3>(
           {{analog_pin, INPUT}, {multiplexA, OUTPUT}, {multiplexB, OUTPUT}}) {};
 
-int Accelerometer::getXAxis() { return analogRead(getPin(0)); };
-int Accelerometer::getYAxis() { return analogRead(getPin(1)); };
-int Accelerometer::getZAxis() { return analogRead(getPin(2)); };
+int Accelerometer::readChannel(bool s1, bool s0) {
+  digitalWrite(getPin(1), s1);
+  digitalWrite(getPin(2), s0);
+  delay(10);
+  return analogRead(getPin(0));
+}
+
+float Accelerometer::calcAcceleration(int raw, float zero) {
+  float voltage = raw * ADC_REF / ADC_AMPLITUDE;
+  return (voltage - zero) / SENSITIVITY;
+}
 
 float Accelerometer::getAccelerationX() {
-  digitalWrite(getPin(1), LOW);
-  digitalWrite(getPin(2), LOW);
-  delay(10);
-  return calcAcceleration((float)getXAxis());
-}
-float Accelerometer::getAccelerationY() {
-  digitalWrite(getPin(1), LOW);
-  digitalWrite(getPin(2), HIGH);
-  delay(10);
-  return calcAcceleration((float)getYAxis());
-}
-float Accelerometer::getAccelerationZ() {
-  digitalWrite(getPin(1), HIGH);
-  digitalWrite(getPin(2), HIGH);
-  delay(10);
-  return calcAcceleration((float)getZAxis());
+  return calcAcceleration(readChannel(LOW, LOW), ZERO_X);
 }
 
-float calcAcceleration(float signal) {
-  float voltage = signal * ADC_REF / ADC_AMPLITUDE;
-  return (voltage - ZERO_X) / SENSITIVITY;
+float Accelerometer::getAccelerationY() {
+  return calcAcceleration(readChannel(LOW, HIGH), ZERO_Y);
 }
+
+float Accelerometer::getAccelerationZ() {
+  return calcAcceleration(readChannel(HIGH, LOW), ZERO_Z);
+}
+
+int Accelerometer::getPotentiometer() { return readChannel(HIGH, HIGH); }

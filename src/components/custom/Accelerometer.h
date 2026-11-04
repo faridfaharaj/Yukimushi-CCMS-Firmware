@@ -1,18 +1,14 @@
 #include "Component.h"
 #include <cstdint>
 
-#define ZERO_X 1.22
-#define ZERO_Y 1.22
-#define ZERO_Z 1.25
+#define ZERO_X 1.65f // volts, adjust to your hardware
+#define ZERO_Y 1.65f
+#define ZERO_Z 1.65f
 
-#define SENSITIVITY 0.25
-
-#define ADC_AMPLITUDE 1024
-
-#define ADC_REF 5
-
-#define VREF 3300.0
-#define ADC_MAX 1024
+#define SENSITIVITY 0.300f // V/g
+//
+#define ADC_AMPLITUDE 1024.0f
+#define ADC_REF 3.3f
 
 class Accelerometer : Component<3> {
 
@@ -22,12 +18,9 @@ public:
   float getAccelerationX();
   float getAccelerationY();
   float getAccelerationZ();
-
-  float calcVolt(float);
-  float calcAcceleration(float);
+  int getPotentiometer();
 
 private:
-  int getXAxis();
-  int getYAxis();
-  int getZAxis();
+  int readChannel(bool s1, bool s0);
+  float calcAcceleration(int raw, float zero);
 };
