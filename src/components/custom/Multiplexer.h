@@ -23,6 +23,8 @@ public:
     getPin(0)->writeDigital(v);
   }
 
+  uint8_t getZpin() { return getPin(0)->getPin(); }
+
 private:
   uint8_t current = 255;
   void select(uint8_t ch) {
