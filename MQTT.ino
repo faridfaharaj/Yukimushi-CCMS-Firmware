@@ -1,4 +1,4 @@
-#include "src/comms.h"
+#include "src/CommsManager.h"
 #include "src/components/ComponentManager.h"
 #include "src/config.h"
 #include <ESP8266HTTPClient.h>
@@ -17,7 +17,6 @@ void setup() {
       delay(1000);
   }
 
-  // wifi
   const char *WIFI_SSID = doc["wifi"]["ssid"] | "";
   const char *WIFI_PASSWORD = doc["wifi"]["password"] | "";
 
@@ -30,8 +29,8 @@ void setup() {
 
   uint16_t port = doc["mqtt"]["port"] | 1883;
 
-  commsInit(WIFI_SSID, WIFI_PASSWORD, server, port, topicSub, topicPub,
-            httpServer, key);
+  CommsManager::commsInit(WIFI_SSID, WIFI_PASSWORD, server, port, topicSub,
+                          topicPub, httpServer, key);
 
   ComponentManager::initializeComponents();
 }
@@ -49,5 +48,5 @@ void loop() {
   Serial.println(msg2);
   */
 
-  delay(500); // Consultar cada 15 segundos
+  delay(500);
 }
