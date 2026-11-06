@@ -89,14 +89,21 @@ void loop() {
       http.end();
     }
   */
-  float x = ComponentManager::Accelerometer.getAccelerationX(),
-        y = ComponentManager::Accelerometer.getAccelerationY(),
-        z = ComponentManager::Accelerometer.getAccelerationZ();
 
-  String msg = "x:" + String(x) + " y:" + y + " z:" + z;
-  Serial.print(msg);
+  /*
+  float x = ComponentManager::accelerometer.getAccelerationX(),
+        y = ComponentManager::accelerometer.getAccelerationY(),
+        z = ComponentManager::accelerometer.getAccelerationZ();
 
-  delay(15000); // Consultar cada 15 segundos
+  String msg1 = "x:" + String(x) + " y:" + y + " z:" + z;
+  Serial.println(msg1);
+
+  String msg2 = String(ComponentManager::ldr.readLux()) + " lux";
+  Serial.println(msg2);
+  */
+
+  Serial.println("koko");
+  delay(500); // Consultar cada 15 segundos
 }
 
 void solicitarHoraServidor() {

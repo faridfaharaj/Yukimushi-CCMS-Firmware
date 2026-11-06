@@ -1,20 +1,19 @@
 #pragma once
-#include <Arduino.h>
+#include "pin.h"
 #include <cstddef>
-#include <cstdint>
 
-struct Pin {
-  uint8_t pin;
-  uint8_t mode;
-};
-
-template <std::size_t N> class Component{
+template <std::size_t N> class Component {
 public:
-  explicit Component(const Pin (&pins)[N]);
+  explicit Component(Pin *const (&p)[N]) {
+    for (std::size_t i = 0; i < N; ++i) {
+      pins[i] = p[i];
+      pins[i]->begin();
+    }
+  }
 
 protected:
-  uint8_t getPin(int idx) const;
+  Pin *getPin(int idx) { return pins[idx]; }
 
 private:
-  uint8_t pins[N];
+  Pin *pins[N];
 };
