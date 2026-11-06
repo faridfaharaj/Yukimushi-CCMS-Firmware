@@ -1,9 +1,7 @@
-# Cold Chain Monitor Firmware
-Arduino code for cold chain monitoring.
+# Yukimushi Cold Chain Monitor System Firmware
+Arduino firmware for Yukimushi Cold Chain Monitoring System's devices.
 
-## Requirements
-
-* arduino-cli or arduino IDE
+# Arduino-cli
 
 ## Compiling
 
@@ -76,8 +74,6 @@ python ~/.arduino15/packages/esp8266/hardware/esp8266/3.1.2/tools/upload.py --ch
 python "$env:LOCALAPPDATA\Arduino15\packages\esp8266\hardware\esp8266\3.1.2\tools\upload.py" --chip esp8266 --port <USB-PORT-HERE> --baud 115200 write_flash 0x200000 fs.bin
 ```
 
-
-
 ## Monitoring
 
 ``` bash
@@ -87,7 +83,11 @@ arduino-cli monitor -p <USB-PORT-HERE> --config baudrate=115200
 
 # Arduino IDE
 
-## Setup
+> [!NOTE]
+> The Arduino IDE can build, upload, and flash the project just fine; however, it can only edit `.ino` and `.h` files in the root folder.
+> You'll need to use another editor to edit the rest of the files.
+
+## Requirements
 
 ### ESP8266 core
 

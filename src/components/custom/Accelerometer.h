@@ -12,7 +12,7 @@ class Accelerometer : Component<3> {
 public:
   explicit Accelerometer(InputPinBase &outX, InputPinBase &outY,
                          InputPinBase &outZ)
-      : Component<3>({{&outX}, {&outY}, {&outZ}}) {};
+      : Component<3>({&outX, &outY, &outZ}) {};
 
   float calcAcceleration(int raw, float zero) {
     return (calcVolts(raw) - zero) / SENSITIVITY;
