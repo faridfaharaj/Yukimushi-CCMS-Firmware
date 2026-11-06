@@ -1,3 +1,5 @@
+// INFO: only works on (D2, D1, D6, D7, D5) pins
+
 #pragma once
 #include "Component.h"
 #include "pin.h"

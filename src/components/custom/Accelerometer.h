@@ -1,3 +1,5 @@
+// INFO: only works on analog (A0) pin, use a multiplexer
+
 #pragma once
 #include "Component.h"
 
