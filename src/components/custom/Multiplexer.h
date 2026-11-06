@@ -3,7 +3,7 @@
 
 class Multiplexer : Component<3>, public ChannelSource {
 public:
-  Multiplexer(Pin &z, OutputPinBase &s0, OutputPinBase &s1)
+  explicit Multiplexer(Pin &z, OutputPinBase &s0, OutputPinBase &s1)
       : Component<3>({&z, &s0, &s1}) {}
 
   int readAnalog(uint8_t ch) override {

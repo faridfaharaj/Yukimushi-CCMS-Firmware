@@ -89,11 +89,16 @@ void loop() {
       http.end();
     }
   */
+
+  /*
   float x = ComponentManager::accelerometer.getAccelerationX(),
         y = ComponentManager::accelerometer.getAccelerationY(),
         z = ComponentManager::accelerometer.getAccelerationZ();
 
   String msg = "x:" + String(x) + " y:" + y + " z:" + z;
+  */
+
+  String msg = String(ComponentManager::ldr.readLux()) + " lux";
   Serial.println(msg);
 
   delay(500); // Consultar cada 15 segundos

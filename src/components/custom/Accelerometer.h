@@ -8,7 +8,7 @@ class Accelerometer : Component<3> {
   static constexpr float ADC_MAX = 1023.0f;
 
 public:
-  Accelerometer(InputPinBase &outX, InputPinBase &outY, InputPinBase &outZ)
+  explicit Accelerometer(InputPinBase &outX, InputPinBase &outY, InputPinBase &outZ)
       : Component<3>({{&outX}, {&outY}, {&outZ}}) {};
 
   float calcAcceleration(int raw, float zero) {

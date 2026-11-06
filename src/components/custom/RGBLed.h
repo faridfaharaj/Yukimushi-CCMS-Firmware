@@ -8,7 +8,8 @@ private:
   }
 
 public:
-  RGBLed(OutputPinBase &redPin, OutputPinBase &greenPin, OutputPinBase &bluePin)
+  explicit RGBLed(OutputPinBase &redPin, OutputPinBase &greenPin,
+                  OutputPinBase &bluePin)
       : Component<3>({&redPin, &greenPin, &bluePin}) {}
 
   void setColor(uint32_t hexColor) {
