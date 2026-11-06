@@ -2,6 +2,7 @@
 
 #include "NewPing.h"
 #include "custom/Accelerometer.h"
+#include "custom/Multiplexer.h"
 #include "custom/RGBLed.h"
 #include <Arduino.h>
 #include <DHT.h>
@@ -19,7 +20,8 @@ public:
   static NewPing distanceSensor;
   */
 
-  static Accelerometer Accelerometer;
+  static Multiplexer multiplexer;
+  static Accelerometer accelerometer;
 
   static void initializeComponents();
 };

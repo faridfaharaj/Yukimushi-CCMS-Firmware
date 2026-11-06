@@ -1,12 +1,22 @@
 #include "ComponentManager.h"
-#include <NewPing.h>
 
-RGBLed ComponentManager::led(D0, D1, D2);
-/*
-DHT ComponentManager::tempHumSensor(D3, DHT11);
-NewPing ComponentManager::distanceSensor(D5, D6, 400);
-*/
+outPin ledR(D2), ledG(D3), ledB(D4);
+inPin muxZ(A0);
+outPin muxS0(D3), muxS1(D4);
 
-Accelerometer ComponentManager::Accelerometer(A0, D3, D4);
+RGBLed ComponentManager::led(ledR, ledG, ledB);
 
-void ComponentManager::initializeComponents() { /*tempHumSensor.begin();*/ };
+Multiplexer ComponentManager::multiplexer(muxZ, muxS0, muxS1);
+PlexedInPin accX(ComponentManager::multiplexer, 0),
+    accY(ComponentManager::multiplexer, 1),
+    accZ(ComponentManager::multiplexer, 2);
+
+Accelerometer ComponentManager::accelerometer(accX, accY, accZ);
+
+void ComponentManager::initializeComponents() {
+  /*
+  tempHumSensor.begin();
+  */
+
+  accelerometer.init();
+}

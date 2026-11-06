@@ -3,10 +3,13 @@
 
 class Led : public Component<1> {
 public:
-  Led(uint8_t pin);
-  void setBrightness(uint16_t brightness);
-  void setBrightness(uint8_t brightness);
-  void setOn();
-  void setOff();
+  explicit Led(OutputPinBase &pin) : Component<1>({&pin}) {}
 
+  void setBrightness(uint16_t brightness) {
+    getPin(0)->writeAnalog(brightness);
+  }
+  void setState(uint8_t state) { getPin(0)->writeDigital(state); }
+
+  void setOn() { getPin(0)->writeDigital(LOW); }
+  void setOff() { getPin(0)->writeDigital(HIGH); }
 };

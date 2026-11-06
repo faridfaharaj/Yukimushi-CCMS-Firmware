@@ -89,14 +89,14 @@ void loop() {
       http.end();
     }
   */
-  float x = ComponentManager::Accelerometer.getAccelerationX(),
-        y = ComponentManager::Accelerometer.getAccelerationY(),
-        z = ComponentManager::Accelerometer.getAccelerationZ();
+  float x = ComponentManager::accelerometer.getAccelerationX(),
+        y = ComponentManager::accelerometer.getAccelerationY(),
+        z = ComponentManager::accelerometer.getAccelerationZ();
 
   String msg = "x:" + String(x) + " y:" + y + " z:" + z;
-  Serial.print(msg);
+  Serial.println(msg);
 
-  delay(15000); // Consultar cada 15 segundos
+  delay(500); // Consultar cada 15 segundos
 }
 
 void solicitarHoraServidor() {
