@@ -1,7 +1,7 @@
 // INFO: only works on (D2, D1, D6, D7, D5) pins
 #pragma once
 #include "Component.h"
-#include "pin.h"
+#include "pins/regularPins/InPullupPin.h"
 #include <Schedule.h>
 
 class Button : public Component<1> {
@@ -20,7 +20,7 @@ private:
   }
 
 public:
-  explicit Button(inPullupPin &pin, void (*callback)())
+  explicit Button(InPullupPin &pin, void (*callback)())
       : Component<1>({&pin}), callback(callback) {}
 
   void init() {

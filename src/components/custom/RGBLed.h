@@ -1,5 +1,6 @@
 #pragma once
 #include "Component.h"
+#include "pins/OutputPinBase.h"
 
 class RGBLed : public Component<3> {
 private:

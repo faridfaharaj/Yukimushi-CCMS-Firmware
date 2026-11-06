@@ -2,6 +2,7 @@
 
 #pragma once
 #include "Component.h"
+#include "pins/InputPinBase.h"
 
 class Accelerometer : Component<3> {
   static inline float ZERO_X = 0, ZERO_Y = 0, ZERO_Z = 0;

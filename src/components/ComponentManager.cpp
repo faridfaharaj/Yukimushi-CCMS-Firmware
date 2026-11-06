@@ -1,8 +1,9 @@
 #include "ComponentManager.h"
 #include "../CommsManager.h"
-#include "custom/pin.h"
+#include "custom/pins/regularPins/InPin.h"
+#include "custom/pins/regularPins/OutPin.h"
 
-outPin ledR(D2), ledG(D3), ledB(D4);
+OutPin ledR(D2), ledG(D3), ledB(D4);
 RGBLed ComponentManager::led(ledR, ledG, ledB);
 
 /*
@@ -19,7 +20,7 @@ PlexedInPin accX(ComponentManager::multiplexer, 0),
 Accelerometer ComponentManager::accelerometer(accX, accY, accZ);
 */
 
-inPullupPin btnPin(D5);
+InPullupPin btnPin(D5);
 Button ComponentManager::btn(btnPin, []() IRAM_ATTR {
   CommsManager::solicitarHoraServidor();
 });

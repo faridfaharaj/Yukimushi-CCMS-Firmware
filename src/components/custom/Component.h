@@ -1,5 +1,5 @@
 #pragma once
-#include "pin.h"
+#include "pins/Pin.h"
 #include <cstddef>
 
 template <std::size_t N> class Component {

@@ -1,6 +1,7 @@
 // INFO: only works on analog (A0) pin, use a multiplexer
 #pragma once
 #include "Component.h"
+#include "pins/InputPinBase.h"
 
 class LDR : public Component<1> {
 

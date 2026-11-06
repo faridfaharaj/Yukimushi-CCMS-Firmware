@@ -1,5 +1,6 @@
 #pragma once
 #include "Component.h"
+#include "pins/OutputPinBase.h"
 
 class Led : public Component<1> {
 public:

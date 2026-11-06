@@ -1,5 +1,6 @@
 #pragma once
 #include "Component.h"
+#include "pins/OutputPinBase.h"
 
 class Multiplexer : Component<3>, public ChannelSource {
 public:
