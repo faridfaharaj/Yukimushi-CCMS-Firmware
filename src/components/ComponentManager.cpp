@@ -1,5 +1,6 @@
 #include "ComponentManager.h"
 #include "custom/pin.h"
+#include "../comms.h"
 
 outPin ledR(D2), ledG(D3), ledB(D4);
 RGBLed ComponentManager::led(ledR, ledG, ledB);
@@ -20,7 +21,7 @@ Accelerometer ComponentManager::accelerometer(accX, accY, accZ);
 
 inPullupPin btnPin(D5);
 Button ComponentManager::btn(btnPin, []() IRAM_ATTR {
-  Serial.println("Button Pressed!!!");
+  solicitarHoraServidor();
 });
 
 void ComponentManager::initializeComponents() {

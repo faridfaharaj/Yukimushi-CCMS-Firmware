@@ -1,13 +1,34 @@
 #include "comms.h"
+#include "ArduinoJson/Document/JsonDocument.hpp"
 #include "components/ComponentManager.h"
 
-static WiFiClient espClient;
-static PubSubClient client(espClient);
+static WiFiClient wifiClient;
+static HTTPClient httpClient;
+static PubSubClient client(wifiClient);
 
 static const char *mqtt_server;
 static const char *channelTopicSub;
 static const char *channelTopicPub;
 static char clientId[24];
+
+const char *serverName;
+const char *apiKey = "tPmW983xXyZ";
+
+// only for debugging, delete later maybe?
+bool hadWIFI = false, hadMQTT = false;
+
+bool wifiConnected() {
+  bool hasConnected = WiFi.status() != WL_CONNECTED;
+  if (hadWIFI != hasConnected) {
+    if (hasConnected) {
+      Serial.println("wifi Connected!");
+    } else {
+      Serial.println("Lost Wifi Connection...");
+    }
+    hadWIFI = hasConnected;
+  };
+  return hasConnected;
+}
 
 void wifiInit(const char *WIFI_SSID, const char *WIFI_PASSWORD) {
   delay(100);
@@ -16,13 +37,17 @@ void wifiInit(const char *WIFI_SSID, const char *WIFI_PASSWORD) {
   Serial.println(WiFi.macAddress());
   Serial.print("Seting up WiFi --> ");
   Serial.println(WIFI_SSID);
+
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+
   short timeOutTimer = 30 * 2;
-  while (WiFi.status() != WL_CONNECTED) {
+  while (wifiConnected()) {
     delay(500);
     if (timeOutTimer == 0) {
       Serial.print("\r      \r");
-      Serial.print("Its taking too long to connect    ");
+      Serial.println("Too too long");
+      Serial.println("Continuing without connection...");
+      break;
     }
 
     Serial.print(".");
@@ -40,7 +65,7 @@ void wifiInit(const char *WIFI_SSID, const char *WIFI_PASSWORD) {
   Serial.println(WiFi.localIP());
 }
 
-void reconnect() {
+void connectMQTT() {
   while (!client.connected()) {
     Serial.print("Trying MQTT connection ...");
 
@@ -56,12 +81,15 @@ void reconnect() {
   }
 }
 
-void commsInit(const char *ssid, const char *password, const char *server,
-               uint16_t port, const char *sub, const char *pub) {
+void commsInit(const char *ssid, const char *password, const char *mqtt,
+               uint16_t port, const char *sub, const char *pub,
+               const char *serverURL, const char *apiKey) {
 
-  mqtt_server = strdup(server);
+  mqtt_server = strdup(mqtt);
   channelTopicSub = strdup(sub);
   channelTopicPub = strdup(pub);
+  serverName = strdup(serverURL);
+  apiKey = strdup(apiKey);
 
   uint8_t mac[6];
   WiFi.macAddress(mac);
@@ -75,10 +103,49 @@ void commsInit(const char *ssid, const char *password, const char *server,
 
 void commsUpdate() {
   if (!client.connected()) {
-    reconnect();
+    connectMQTT();
   }
   client.loop();
 };
+
+JsonDocument getApi(const char *path) {
+  JsonDocument doc;
+  String url = String(serverName) + path;
+  if (!httpClient.begin(wifiClient, url)) {
+    Serial.print("Coulnt establish connection with: ");
+    Serial.println(serverName);
+    return doc;
+  };
+
+  // IMPORTANTE: Enviamos la API Key en los Headers como lo configuramos en
+  // Node.js
+  httpClient.addHeader("x-api-key", apiKey);
+
+  // Realizar la petición GET
+  int httpResponseCode = httpClient.GET();
+
+  if (httpResponseCode == 200) {
+    String payload = httpClient.getString();
+
+    // Reservar memoria para el JSON (Ajustar según el tamaño del límite)
+    DeserializationError error = deserializeJson(doc, payload);
+
+    if (!error) {
+
+      return doc;
+
+    } else {
+      Serial.print("Couldnt process JSON response: ");
+      Serial.println(error.c_str());
+    }
+  } else {
+    Serial.printf("HTTP Error: %d\n", httpResponseCode);
+  }
+
+  httpClient.end();
+
+  return doc;
+}
 
 void commsPublish(const char *payload) {
   char msg[64];
@@ -111,4 +178,23 @@ void callback(char *topic, byte *payload, unsigned int length) {
   default:
     break;
   }
+}
+
+void solicitarHoraServidor() {
+  JsonDocument doc = getApi("/api/datetime");
+
+  if (doc.isNull()) {
+    return;
+  };
+
+  // Asignación directa a variables globales
+  String fechaServidor = doc["date"].as<String>();
+  int diaDeLaSemana = doc["dayNumber"].as<int>();
+  String horaServidor = doc["time"].as<String>();
+
+  Serial.println("\n--- [OPERACIÓN HORA REALIZADA] ---");
+  Serial.printf("Fecha del Servidor: %s\n", fechaServidor.c_str());
+  Serial.printf("Número de Día:      %d\n", diaDeLaSemana);
+  Serial.printf("Hora del Servidor:  %s\n", horaServidor.c_str());
+  Serial.println("-----------------------------------\n");
 }
