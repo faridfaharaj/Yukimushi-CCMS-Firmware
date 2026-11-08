@@ -1,5 +1,5 @@
 #include "src/CommsManager.h"
-#include "src/components/ComponentManager.h"
+#include "src/components/ComponentRegistry.h"
 #include "src/config.h"
 #include <ESP8266HTTPClient.h>
 #include <cstdio>
@@ -34,7 +34,7 @@ void setup() {
   CommsManager::httpInit(httpServer);
   CommsManager::setApiKey(key);
 
-  ComponentManager::initializeComponents();
+  ComponentRegistry::initializeComponents();
 }
 
 void loop() {

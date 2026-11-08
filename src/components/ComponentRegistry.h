@@ -9,7 +9,7 @@
 #include <Arduino.h>
 #include <DHT.h>
 
-class ComponentManager {
+class ComponentRegistry {
 public:
   static DHT tempHumSensor;
   static NewPing distanceSensor;
