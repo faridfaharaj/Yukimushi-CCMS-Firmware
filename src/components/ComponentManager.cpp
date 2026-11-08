@@ -1,5 +1,4 @@
 #include "ComponentManager.h"
-#include "../CommsManager.h"
 #include "custom/pins/regularPins/InPin.h"
 #include "custom/pins/regularPins/OutPin.h"
 
@@ -23,7 +22,7 @@ Accelerometer ComponentManager::accelerometer(accX, accY, accZ);
 
 InPullupPin btnPin(D5);
 Button ComponentManager::btn(btnPin, []() IRAM_ATTR {
-  CommsManager::solicitarHoraServidor();
+
 });
 */
 
@@ -31,6 +30,6 @@ void ComponentManager::initializeComponents() {
   /*
   tempHumSensor.begin();
   accelerometer.init();
-  */
   btn.init();
+  */
 }

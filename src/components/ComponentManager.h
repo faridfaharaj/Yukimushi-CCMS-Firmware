@@ -11,15 +11,15 @@
 
 class ComponentManager {
 public:
-  static RGBLed led;
+  //static RGBLed led;
   /*
   static LDR ldr;
   static DHT tempHumSensor;
   static NewPing distanceSensor;
   static Multiplexer multiplexer;
   static Accelerometer accelerometer;
-  */
   static Button btn;
+  */
 
   static void initializeComponents();
 };
