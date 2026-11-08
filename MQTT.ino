@@ -1,8 +1,15 @@
+#include "HardwareSerial.h"
 #include "src/CommsManager.h"
 #include "src/Config.h"
+#include "src/SensorProcesses.h"
 #include "src/components/ComponentRegistry.h"
 #include <ESP8266HTTPClient.h>
 #include <cstdio>
+
+// showcase
+void printTemp(float degrees) {
+  Serial.println("Humidity: " + String(degrees) + "C°");
+}
 
 void setup() {
   Serial.begin(115200);
@@ -35,8 +42,12 @@ void setup() {
   CommsManager::setApiKey(key);
 
   ComponentRegistry::initializeComponents();
+
+  SensorProcesses::init();
+  SensorProcesses::onReadTemperature.subscribe(printTemp);
 }
 
 void loop() {
   CommsManager::update();
+  SensorProcesses::update();
 }

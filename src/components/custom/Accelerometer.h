@@ -1,5 +1,4 @@
 // INFO: only works on analog (A0) pin, use a multiplexer
-
 #pragma once
 #include "Component.h"
 #include "pins/InputPinBase.h"
@@ -42,5 +41,11 @@ public:
   }
   float getAccelerationZ() {
     return calcAcceleration(getPin(2)->readAnalog(), ZERO_Z);
+  }
+
+  void readAcceleration(float &outX, float &outY, float &outZ) {
+    outX = getAccelerationX();
+    outY = getAccelerationY();
+    outZ = getAccelerationZ();
   }
 };

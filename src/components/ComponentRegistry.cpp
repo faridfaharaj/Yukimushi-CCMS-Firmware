@@ -6,13 +6,12 @@
 
 namespace ComponentRegistry {
 
-constexpr unsigned int maxDistance = 400;
-
+constexpr unsigned int MAX_DISTANCE = 400;
 DHT tempHumSensor(D1, DHT11);
-NewPing distanceSensor(D2, D5, maxDistance);
+NewPing distanceSensor(D2, D5, MAX_DISTANCE);
 
 InPullupPin btnPin(D3);
-Button btn(btnPin, []() IRAM_ATTR {});
+Button btn(btnPin);
 
 OutPin ledPin(D4);
 LED led(ledPin);
