@@ -2,9 +2,9 @@
 #include "Component.h"
 #include "pins/OutputPinBase.h"
 
-class Led : public Component<1> {
+class LED : public Component<1> {
 public:
-  explicit Led(OutputPinBase &pin) : Component<1>({&pin}) {}
+  explicit LED(OutputPinBase &pin) : Component<1>({&pin}) {}
 
   void setBrightness(uint16_t brightness) {
     getPin(0)->writeAnalog(brightness);

@@ -1,18 +1,24 @@
+// NOTE: Pins were selected provisionally until the physical layout is done.
 #include "ComponentManager.h"
+#include "custom/pins/MultiplexerPins/PlexedInPin.h"
 #include "custom/pins/regularPins/InPin.h"
 #include "custom/pins/regularPins/OutPin.h"
 
-/*
-OutPin ledR(D2), ledG(D3), ledB(D4);
-RGBLed ComponentManager::led(ledR, ledG, ledB);
-*/
+DHT ComponentManager::tempHumSensor(D1, DHT11);
 
-/*
-inPin ldrPin(A0);
-LDR ComponentManager::ldr(ldrPin, 330, true);
+constexpr uint maxdistance = 400;
+NewPing ComponentManager::distanceSensor(D2, D5, 400);
 
-inPin muxZ(A0);
-outPin muxS0(D3), muxS1(D4);
+InPullupPin btnPin(D3);
+Button ComponentManager::btn(btnPin, []() IRAM_ATTR {
+
+});
+
+OutPin ledPin(D4);
+LED ComponentManager::led(ledPin);
+
+InPin muxZ(A0);
+OutPin muxS0(D6), muxS1(D7);
 Multiplexer ComponentManager::multiplexer(muxZ, muxS0, muxS1);
 
 PlexedInPin accX(ComponentManager::multiplexer, 0),
@@ -20,16 +26,11 @@ PlexedInPin accX(ComponentManager::multiplexer, 0),
     accZ(ComponentManager::multiplexer, 2);
 Accelerometer ComponentManager::accelerometer(accX, accY, accZ);
 
-InPullupPin btnPin(D5);
-Button ComponentManager::btn(btnPin, []() IRAM_ATTR {
-
-});
-*/
+PlexedInPin ldrPin(ComponentManager::multiplexer, 3);
+LDR ComponentManager::ldr(ldrPin, 330, true);
 
 void ComponentManager::initializeComponents() {
-  /*
   tempHumSensor.begin();
   accelerometer.init();
   btn.init();
-  */
 }

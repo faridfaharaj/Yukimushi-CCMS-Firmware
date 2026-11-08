@@ -1,4 +1,4 @@
-// INFO: only works on (D2, D1, D6, D7, D5) pins
+// INFO: only works on (D1, D2, D5, D6, D7) pins
 #pragma once
 #include "Component.h"
 #include "pins/regularPins/InPullupPin.h"

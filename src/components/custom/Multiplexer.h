@@ -23,6 +23,7 @@ public:
     select(ch);
     getPin(0)->writeDigital(v);
   }
+  virtual uint8_t getZPin(uint8_t ch) override { return getPin(0)->getPin(); }
 
   uint8_t getZpin() { return getPin(0)->getPin(); }
 
