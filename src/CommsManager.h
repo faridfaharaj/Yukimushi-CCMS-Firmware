@@ -1,5 +1,6 @@
 #pragma once
 #include "components/ComponentManager.h"
+#include "wl_definitions.h"
 #include <ArduinoJson.h>
 #include <ESP8266HTTPClient.h>
 #include <ESP8266WiFi.h>
@@ -30,7 +31,7 @@ public:
     bool hasConnected = WiFi.status() == WL_CONNECTED;
     if (hadWIFI != hasConnected) {
       if (hasConnected) {
-        Serial.println("wifi Connected!");
+        Serial.println("wifi Connected");
       } else {
         Serial.println("Lost Wifi Connection...");
       }
@@ -112,92 +113,84 @@ public:
   };
 
   void commsUpdate() {
-    if (!mqttClient.connected()) {
+    bool hasMQTT = mqttClient.connected();
+    if (!hasMQTT) {
+      if (hasMQTT != hadMQTT) {
+        Serial.println("MQTT broker connected");
+      } else {
+        Serial.println("MQTT broker disconected");
+      }
       connectMQTT();
     }
+    hadMQTT = hasMQTT;
+
     mqttClient.loop();
   };
 
-  static JsonDocument getApi(const char *path) {
-    JsonDocument doc;
+  static bool getApi(const char *path, JsonDocument &doc) {
     String url = String(serverName) + path;
-    if (!httpClient.begin(wifiClient, url)) {
-      Serial.print("Coulnt establish connection with: ");
-      Serial.println(serverName);
-      return doc;
-    };
 
-    // IMPORTANTE: Enviamos la API Key en los Headers como lo configuramos en
-    // Node.js
+    if (!httpClient.begin(wifiClient, url)) {
+      Serial.print("Couldn't establish connection with: ");
+      Serial.println(serverName);
+      return false;
+    }
+
     httpClient.addHeader("x-api-key", apiKey);
 
-    // Realizar la petición GET
     int httpResponseCode = httpClient.GET();
+    bool ok = false;
 
     if (httpResponseCode == 200) {
-      String payload = httpClient.getString();
-
-      // Reservar memoria para el JSON (Ajustar según el tamaño del límite)
-      DeserializationError error = deserializeJson(doc, payload);
-
-      if (!error) {
-
-        return doc;
-
-      } else {
-        Serial.print("Couldnt process JSON response: ");
+      DeserializationError error = deserializeJson(doc, httpClient.getStream());
+      if (error) {
+        Serial.print("Couldn't process JSON response: ");
         Serial.println(error.c_str());
+      } else {
+        ok = true;
       }
     } else {
       Serial.printf("HTTP Error: %d\n", httpResponseCode);
     }
 
     httpClient.end();
-
-    return doc;
+    return ok;
   }
 
   void commsPublish(const char *payload) {
     char msg[64];
-    snprintf(msg, sizeof(msg), "%s: %s", clientId, payload);
-    mqttClient.publish(channelTopicPub, msg);
+
+    int n = snprintf(msg, sizeof(msg), "%s: %s", clientId, payload);
+    if (n < 0 || n >= (int)sizeof(msg)) {
+      Serial.println("Message " + String(payload) +
+                     " exeeds size limit: " + sizeof(msg));
+      return;
+    }
+
+    if (!mqttClient.publish(channelTopicPub, msg)) {
+      Serial.println("Failed to publish: " + String(payload));
+    }
   };
 
   static void callback(char *topic, byte *payload, unsigned int length) {
-    char *cstring = (char *)payload;
-    cstring[length] = '\0'; // Adds a terminate to end of string based on length
-                            // of current payload
+    char cstring[64];
+    size_t n = min((size_t)length, sizeof(cstring) - 1);
+    memcpy(cstring, payload, n);
+    cstring[n] = '\0';
+
     Serial.println(cstring);
-    switch (cstring[1]) {
-    case 'R':
-      Serial.println("\tRojo");
-      ComponentManager::led.setRed();
-      break;
-    case 'G':
-      Serial.println("\tVerde");
-      ComponentManager::led.setGreen();
-      break;
-    case 'B':
-      Serial.println("\tAzul");
-      ComponentManager::led.setBlue();
-      break;
-    case 'X':
-      Serial.println("\tAPAGAR todo!");
-      ComponentManager::led.setOff();
-      break;
-    default:
-      break;
-    }
+
+    if (n < 2)
+      return;
   }
 
   static void solicitarHoraServidor() {
-    JsonDocument doc = getApi("/api/datetime");
+    JsonDocument doc;
 
-    if (doc.isNull()) {
+    if (getApi("/api/datetime", doc)) {
       return;
     };
 
-    // Asignación directa a variables globales
     String fechaServidor = doc["date"].as<String>();
     int diaDeLaSemana = doc["dayNumber"].as<int>();
     String horaServidor = doc["time"].as<String>();

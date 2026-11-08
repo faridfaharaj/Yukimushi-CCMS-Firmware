@@ -3,8 +3,10 @@
 #include "custom/pins/regularPins/InPin.h"
 #include "custom/pins/regularPins/OutPin.h"
 
+/*
 OutPin ledR(D2), ledG(D3), ledB(D4);
 RGBLed ComponentManager::led(ledR, ledG, ledB);
+*/
 
 /*
 inPin ldrPin(A0);
@@ -18,12 +20,12 @@ PlexedInPin accX(ComponentManager::multiplexer, 0),
     accY(ComponentManager::multiplexer, 1),
     accZ(ComponentManager::multiplexer, 2);
 Accelerometer ComponentManager::accelerometer(accX, accY, accZ);
-*/
 
 InPullupPin btnPin(D5);
 Button ComponentManager::btn(btnPin, []() IRAM_ATTR {
   CommsManager::solicitarHoraServidor();
 });
+*/
 
 void ComponentManager::initializeComponents() {
   /*
