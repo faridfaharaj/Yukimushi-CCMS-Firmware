@@ -1,6 +1,6 @@
 #include "src/CommsManager.h"
+#include "src/Config.h"
 #include "src/components/ComponentRegistry.h"
-#include "src/config.h"
 #include <ESP8266HTTPClient.h>
 #include <cstdio>
 
@@ -9,7 +9,7 @@ void setup() {
   delay(200);
 
   // Json Configuration
-  JsonDocument doc = getConfig();
+  JsonDocument doc = Config::load();
 
   if (doc.isNull()) {
     Serial.println("Config failed, halting");
@@ -39,5 +39,4 @@ void setup() {
 
 void loop() {
   CommsManager::update();
-  delay(500);
 }

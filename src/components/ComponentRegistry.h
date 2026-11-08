@@ -9,15 +9,14 @@
 #include <Arduino.h>
 #include <DHT.h>
 
-class ComponentRegistry {
-public:
-  static DHT tempHumSensor;
-  static NewPing distanceSensor;
-  static Button btn;
-  static LED led;
-  static Multiplexer multiplexer;
-  static Accelerometer accelerometer;
-  static LDR ldr;
+namespace ComponentRegistry {
+extern DHT tempHumSensor;
+extern NewPing distanceSensor;
+extern Button btn;
+extern LED led;
+extern Multiplexer multiplexer;
+extern Accelerometer accelerometer;
+extern LDR ldr;
 
-  static void initializeComponents();
-};
+void initializeComponents();
+}; // namespace ComponentRegistry

@@ -1,8 +1,7 @@
-#pragma once
-#include <ArduinoJson.h>
+#include "Config.h"
 #include <LittleFS.h>
 
-inline JsonDocument getConfig() {
+JsonDocument Config::load() {
   JsonDocument doc;
 
   if (!LittleFS.begin()) {
