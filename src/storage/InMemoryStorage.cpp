@@ -1,24 +1,24 @@
 #include "InMemoryStorage.h"
 #include "../SensorProcesses.h"
-#include "containers/Deque.h"
+#include "containers/Queue.h"
 
 namespace InMemoryStorage {
 
-Deque<416, HumidityReading> Humidity;
-Deque<416, TemperatureReading> temperature;
-Deque<416, LightReading> light;
+Queue<416, HumidityReading> Humidity;
+Queue<416, TemperatureReading> temperature;
+Queue<416, LightReading> light;
 
-Deque<666, CoverReading> cover;
+Queue<666, CoverReading> cover;
 
-Deque<833, ShockReading> shock;
-Deque<833, TippedReading> Tipped;
+Queue<833, ShockReading> shock;
+Queue<833, TippedReading> Tipped;
 
 void storeCover(bool reading) {
   if (cover.isFull())
     return;
 
   CoverReading coverR(reading);
-  cover.pushLast(coverR);
+  cover.push(coverR);
 }
 
 void storeHumidity(float reading) {
@@ -26,7 +26,7 @@ void storeHumidity(float reading) {
     return;
 
   HumidityReading humidityR(reading);
-  Humidity.pushLast(humidityR);
+  Humidity.push(humidityR);
 }
 
 void storeLight(float reading) {
@@ -34,7 +34,7 @@ void storeLight(float reading) {
     return;
 
   LightReading lightR(reading);
-  light.pushLast(lightR);
+  light.push(lightR);
 }
 
 void storeShock() {
@@ -42,7 +42,7 @@ void storeShock() {
     return;
 
   ShockReading shockR;
-  shock.pushLast(shockR);
+  shock.push(shockR);
 }
 
 void storeTemperature(float reading) {
@@ -50,7 +50,7 @@ void storeTemperature(float reading) {
     return;
 
   TemperatureReading temperatureR(reading);
-  temperature.pushLast(temperatureR);
+  temperature.push(temperatureR);
 }
 
 void storeTipped(float reading) {
@@ -58,7 +58,7 @@ void storeTipped(float reading) {
     return;
 
   TippedReading tippedR;
-  Tipped.pushLast(tippedR);
+  Tipped.push(tippedR);
 }
 
 } // namespace InMemoryStorage
