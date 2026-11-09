@@ -8,7 +8,7 @@ extern Event<4, float> onReadHumidity;
 extern Event<4, float> onReadTemperature;
 
 extern Event<4, float> onTipped;
-extern Event<4> onShockDetected;
+extern Event<4> onShock;
 extern Event<4, bool> onCoverChanged;
 
 void readbtn(unsigned long time);

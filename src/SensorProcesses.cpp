@@ -11,7 +11,7 @@ Event<4, float> onReadTemperature;
 Event<4, float> onTipped;
 // NOTE: shock GY-61 can only read up to 3g so shock magnitude cannot really be
 // measured unless we have a better sensor
-Event<4> onShockDetected;
+Event<4> onShock;
 Event<4, bool> onCoverChanged;
 
 constexpr unsigned long LIGHT_RATE_MS = 60000;
@@ -53,7 +53,7 @@ void readAcceleration() {
   if (mag2 >= SHOCK_THRESHOLD_G * SHOCK_THRESHOLD_G &&
       cooldownDue(shockCooldown, SHOCK_COOLDOWN_MS)) {
     shockCooldown = millis();
-    onShockDetected.emit();
+    onShock.emit();
   }
 
   // Tilt

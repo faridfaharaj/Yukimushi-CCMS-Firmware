@@ -3,9 +3,7 @@
 #include "src/Config.h"
 #include "src/SensorProcesses.h"
 #include "src/components/ComponentRegistry.h"
-#include "src/storage/InMemoryStorage.h"
 #include <ESP8266HTTPClient.h>
-#include <LittleFS.h>
 #include <cstdio>
 
 void setup() {
@@ -42,23 +40,8 @@ void setup() {
 
   SensorProcesses::init();
 }
-#include <umm_malloc/umm_heap_select.h>
-#include <umm_malloc/umm_malloc.h>
+
 void loop() {
   CommsManager::update();
   SensorProcesses::update();
-
-  uint32_t free, max;
-  uint8_t frag;
-
-  // DRAM
-  ESP.getHeapStats(&free, &max, &frag);
-  Serial.printf("DRAM free: %u bytes\n", free);
-
-  // IRAM
-  {
-    HeapSelectIram heap;
-    ESP.getHeapStats(&free, &max, &frag);
-    Serial.printf("IRAM free: %u bytes\n", free);
-  }
 }
