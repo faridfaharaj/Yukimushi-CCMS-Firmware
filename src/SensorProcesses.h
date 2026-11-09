@@ -3,7 +3,7 @@
 
 namespace SensorProcesses {
 
-extern Event<4, double> onReadLight;
+extern Event<4, float> onReadLight;
 extern Event<4, float> onReadHumidity;
 extern Event<4, float> onReadTemperature;
 

@@ -3,17 +3,10 @@
 #include "src/Config.h"
 #include "src/SensorProcesses.h"
 #include "src/components/ComponentRegistry.h"
+#include "src/storage/InMemoryStorage.h"
 #include <ESP8266HTTPClient.h>
+#include <LittleFS.h>
 #include <cstdio>
-
-// showcase
-void printTemp(float degrees) {
-  Serial.println("Temperature: " + String(degrees) + "C°");
-}
-void printHumidity(float degrees) {
-  Serial.println("Humidity: " + String(degrees) + "%");
-}
-// -------
 
 void setup() {
   Serial.begin(115200);
@@ -48,11 +41,24 @@ void setup() {
   ComponentRegistry::initializeComponents();
 
   SensorProcesses::init();
-  SensorProcesses::onReadTemperature.subscribe(printTemp);
-  SensorProcesses::onReadHumidity.subscribe(printHumidity);
 }
-
+#include <umm_malloc/umm_heap_select.h>
+#include <umm_malloc/umm_malloc.h>
 void loop() {
   CommsManager::update();
   SensorProcesses::update();
+
+  uint32_t free, max;
+  uint8_t frag;
+
+  // DRAM
+  ESP.getHeapStats(&free, &max, &frag);
+  Serial.printf("DRAM free: %u bytes\n", free);
+
+  // IRAM
+  {
+    HeapSelectIram heap;
+    ESP.getHeapStats(&free, &max, &frag);
+    Serial.printf("IRAM free: %u bytes\n", free);
+  }
 }

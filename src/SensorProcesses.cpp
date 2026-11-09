@@ -4,7 +4,7 @@
 #include <cmath>
 
 namespace SensorProcesses {
-Event<4, double> onReadLight;
+Event<4, float> onReadLight;
 Event<4, float> onReadHumidity;
 Event<4, float> onReadTemperature;
 
@@ -34,7 +34,7 @@ void readLight() {
   if (!due(last, LIGHT_RATE_MS))
     return;
 
-  double lux = ComponentRegistry::ldr.readLux();
+  float lux = ComponentRegistry::ldr.readLux();
   onReadLight.emit(lux);
 }
 

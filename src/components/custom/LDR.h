@@ -40,6 +40,6 @@ public:
       : Component<1>({&pin}), externalResistance(externalResistance),
         adcResolutionBits(adcResolutionBits) {}
 
-  double readLux() { return rawAnalogValueToLux(getPin(0)->readAnalog()); }
-  double readFootCandles() { return luxToFootCandles(readLux()); }
+  float readLux() { return rawAnalogValueToLux(getPin(0)->readAnalog()); }
+  float readFootCandles() { return luxToFootCandles(readLux()); }
 };
