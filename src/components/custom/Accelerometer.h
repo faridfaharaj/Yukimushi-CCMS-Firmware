@@ -4,10 +4,12 @@
 #include "pins/InputPinBase.h"
 
 class Accelerometer : Component<3> {
-  static inline float ZERO_X = 0, ZERO_Y = 0, ZERO_Z = 0;
   static constexpr float SENSITIVITY = 0.33f;
   static constexpr float ADC_REF = 3.3f;
   static constexpr float ADC_MAX = 1023.0f;
+
+  static inline float zeroX = ADC_REF / 2, zeroY = ADC_REF / 2,
+                      zeroZ = ADC_REF / 2;
 
 public:
   explicit Accelerometer(InputPinBase &outX, InputPinBase &outY,
@@ -28,19 +30,19 @@ public:
       z += getPin(2)->readAnalog();
       delay(5);
     }
-    ZERO_X = (x / 32.0f) * ADC_REF / ADC_MAX;
-    ZERO_Y = (y / 32.0f) * ADC_REF / ADC_MAX;
-    ZERO_Z = (z / 32.0f) * ADC_REF / ADC_MAX;
+    zeroX = (x / 32.0f) * ADC_REF / ADC_MAX;
+    zeroY = (y / 32.0f) * ADC_REF / ADC_MAX;
+    zeroZ = (z / 32.0f) * ADC_REF / ADC_MAX - SENSITIVITY;
   }
 
   float getAccelerationX() {
-    return calcAcceleration(getPin(0)->readAnalog(), ZERO_X);
+    return calcAcceleration(getPin(0)->readAnalog(), zeroX);
   }
   float getAccelerationY() {
-    return calcAcceleration(getPin(1)->readAnalog(), ZERO_Y);
+    return calcAcceleration(getPin(1)->readAnalog(), zeroY);
   }
   float getAccelerationZ() {
-    return calcAcceleration(getPin(2)->readAnalog(), ZERO_Z);
+    return calcAcceleration(getPin(2)->readAnalog(), zeroZ);
   }
 
   void readAcceleration(float &outX, float &outY, float &outZ) {

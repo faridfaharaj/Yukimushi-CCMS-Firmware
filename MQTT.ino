@@ -8,8 +8,12 @@
 
 // showcase
 void printTemp(float degrees) {
-  Serial.println("Humidity: " + String(degrees) + "C°");
+  Serial.println("Temperature: " + String(degrees) + "C°");
 }
+void printHumidity(float degrees) {
+  Serial.println("Humidity: " + String(degrees) + "%");
+}
+// -------
 
 void setup() {
   Serial.begin(115200);
@@ -45,6 +49,7 @@ void setup() {
 
   SensorProcesses::init();
   SensorProcesses::onReadTemperature.subscribe(printTemp);
+  SensorProcesses::onReadHumidity.subscribe(printHumidity);
 }
 
 void loop() {
