@@ -1,6 +1,12 @@
 #include "InMemoryStorage.h"
 #include "../SensorProcesses.h"
+#include "containers/CoverReading.h"
+#include "containers/HumidityReading.h"
+#include "containers/LightReading.h"
 #include "containers/Queue.h"
+#include "containers/ShockReading.h"
+#include "containers/TemperatureReading.h"
+#include "containers/TippedReading.h"
 
 namespace InMemoryStorage {
 

@@ -5,8 +5,8 @@ template <size_t N, typename T> class Queue {
 private:
   T entries[N];
 
-  size_t head = 0;  // First element
-  size_t count = 0; // Number of elements
+  size_t head = 0;
+  size_t count = 0;
 
 public:
   bool isEmpty() const { return count == 0; }
