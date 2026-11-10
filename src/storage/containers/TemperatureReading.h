@@ -13,7 +13,7 @@ public:
 
   float getFahrenheit() const { return celsius * 1.8f + 32.0f; }
 
-  size_t serialize(uint8_t *buffer) const override {
+  size_t serialize(uint8_t *buffer) const {
     size_t offset = Reading::serialize(buffer);
 
     memcpy(buffer + offset, &celsius, sizeof(celsius));
@@ -21,5 +21,5 @@ public:
     return offset + sizeof(celsius);
   }
 
-  size_t size() const override { return Reading::size() + sizeof(celsius); }
+  static constexpr size_t size() { return Reading::size() + sizeof(float); }
 };

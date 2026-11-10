@@ -10,13 +10,11 @@ public:
 
   float getLux() const { return lux; }
 
-  size_t serialize(uint8_t *buffer) const override {
+  size_t serialize(uint8_t *buffer) const {
     size_t offset = Reading::serialize(buffer);
-
     memcpy(buffer + offset, &lux, sizeof(lux));
-
     return offset + sizeof(lux);
   }
 
-  size_t size() const override { return Reading::size() + sizeof(lux); }
+  static constexpr size_t size() { return Reading::size() + sizeof(float); }
 };

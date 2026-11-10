@@ -8,14 +8,12 @@ private:
 public:
   Reading() : timeStamp(millis()) {}
 
-  virtual ~Reading() = default;
-
   unsigned long getTimeStamp() const { return timeStamp; }
 
-  virtual size_t serialize(uint8_t *buffer) const {
+  size_t serialize(uint8_t *buffer) const {
     memcpy(buffer, &timeStamp, sizeof(timeStamp));
     return sizeof(timeStamp);
   }
 
-  virtual size_t size() const { return sizeof(timeStamp); }
+  static constexpr size_t size() { return sizeof(unsigned long); }
 };

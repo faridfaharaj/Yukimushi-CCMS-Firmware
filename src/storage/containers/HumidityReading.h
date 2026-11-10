@@ -11,7 +11,7 @@ public:
 
   float getHumidityPercentage() const { return humidityPercentage; }
 
-  size_t serialize(uint8_t *buffer) const override {
+  size_t serialize(uint8_t *buffer) const {
     size_t offset = Reading::serialize(buffer);
 
     memcpy(buffer + offset, &humidityPercentage, sizeof(humidityPercentage));
@@ -19,7 +19,5 @@ public:
     return offset + sizeof(humidityPercentage);
   }
 
-  size_t size() const override {
-    return Reading::size() + sizeof(humidityPercentage);
-  }
+  static constexpr size_t size() { return Reading::size() + sizeof(float); }
 };

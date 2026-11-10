@@ -1,7 +1,7 @@
 #pragma once
 #include "Reading.h"
 
-class CoverReading : public Reading {
+class __attribute__((packed)) CoverReading : public Reading {
 private:
   bool open;
 
@@ -10,7 +10,7 @@ public:
 
   bool getOpen() const { return open; }
 
-  size_t serialize(uint8_t *buffer) const override {
+  size_t serialize(uint8_t *buffer) const {
     size_t offset = Reading::serialize(buffer);
 
     memcpy(buffer + offset, &open, sizeof(open));
@@ -18,5 +18,5 @@ public:
     return offset + sizeof(open);
   }
 
-  size_t size() const override { return Reading::size() + sizeof(open); }
+  static constexpr size_t size() { return Reading::size() + sizeof(bool); }
 };
