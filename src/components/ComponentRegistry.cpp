@@ -6,9 +6,10 @@
 
 namespace ComponentRegistry {
 
-constexpr unsigned int MAX_DISTANCE = 400;
 DHT tempHumSensor(D1, DHT11);
-NewPing distanceSensor(D2, D5, MAX_DISTANCE);
+
+InPin sclPin(D2), sdaPin(D5);
+DistanceSensor distanceSensor(sclPin, sdaPin);
 
 InPullupPin btnPin(D3);
 Button btn(btnPin);
@@ -30,6 +31,7 @@ void initializeComponents() {
   tempHumSensor.begin();
   accelerometer.init();
   btn.init();
+  distanceSensor.init();
 }
 
 } // namespace ComponentRegistry

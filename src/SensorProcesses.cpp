@@ -126,7 +126,7 @@ void readCovered() {
   if (!due(last, COVER_RATE_MS))
     return;
 
-  unsigned int cm = ComponentRegistry::distanceSensor.ping_cm();
+  unsigned int cm = ComponentRegistry::distanceSensor.readDistanceCM();
   bool hasCovered = cm > COVER_DISTANCE_CM;
   static bool wasCovered = hasCovered;
   if (wasCovered != hasCovered) {
