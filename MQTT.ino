@@ -35,6 +35,7 @@ void setup() {
   CommsManager::mqttInit(mqttServer, port, topicPub, topicSub);
   CommsManager::httpInit(httpServer);
   CommsManager::setApiKey(key);
+  CommsManager::ntpInit();
 
   ComponentRegistry::initializeComponents();
 

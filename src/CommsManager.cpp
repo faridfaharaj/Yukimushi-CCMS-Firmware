@@ -1,4 +1,5 @@
 #include "CommsManager.h"
+#include "core_esp8266_features.h"
 
 #include <Arduino.h>
 #include <ESP8266HTTPClient.h>
@@ -21,8 +22,11 @@ char clientId[24];
 const char *serverName = nullptr;
 const char *apiKey = nullptr;
 
+WiFiEventHandler onConnected;
+WiFiEventHandler onDisconnected;
+
 // only for debugging, delete later maybe?
-bool hadWIFI = false, hadMQTT = false;
+bool hadMQTT = false;
 
 void callback(char *topic, byte *payload, unsigned int length) {
   char cstring[64];
@@ -36,6 +40,14 @@ void callback(char *topic, byte *payload, unsigned int length) {
 } // namespace
 
 void CommsManager::wifiInit(const char *WIFI_SSID, const char *WIFI_PASSWORD) {
+  onConnected = WiFi.onStationModeGotIP([](const WiFiEventStationModeGotIP &) {
+    Serial.println("wifi Connected!");
+  });
+  onDisconnected = WiFi.onStationModeDisconnected(
+      [](const WiFiEventStationModeDisconnected &) {
+        Serial.println("Wifi Connection lost!");
+      });
+
   uint8_t mac[6];
   WiFi.macAddress(mac);
   snprintf(clientId, sizeof(clientId), "%s-%02X%02X%02X%02X%02X%02X", "Client",
@@ -70,7 +82,6 @@ void CommsManager::wifiInit(const char *WIFI_SSID, const char *WIFI_PASSWORD) {
 
     timeOutTimer--;
   }
-  hadWIFI = true;
   Serial.println();
   Serial.println("WiFi connnected!");
   Serial.print("IP address: ");
@@ -120,18 +131,8 @@ bool CommsManager::mqttConnect() {
 }
 
 void CommsManager::update() {
-  bool hasWifi = wifiConnected();
-  if (hadWIFI != hasWifi) {
-    if (hasWifi) {
-      Serial.println("wifi Connected!");
-    } else {
-      Serial.println("Wifi Connection lost!");
-    }
-    hadWIFI = hasWifi;
-  }
-
   bool hasMQTT = mqttClient.connected();
-  if (!hasMQTT && hasWifi) {
+  if (!hasMQTT && wifiConnected()) {
     hasMQTT = mqttConnect();
   }
   if (hasMQTT != hadMQTT) {
@@ -193,20 +194,4 @@ void CommsManager::mqttPublish(const char *payload) {
   }
 }
 
-void CommsManager::solicitarHoraServidor() {
-  JsonDocument doc;
-
-  if (!getApi("/api/datetime", doc)) {
-    return;
-  }
-
-  String fechaServidor = doc["date"].as<String>();
-  int diaDeLaSemana = doc["dayNumber"].as<int>();
-  String horaServidor = doc["time"].as<String>();
-
-  Serial.println("\n--- [OPERACIÓN HORA REALIZADA] ---");
-  Serial.printf("Fecha del Servidor: %s\n", fechaServidor.c_str());
-  Serial.printf("Número de Día:      %d\n", diaDeLaSemana);
-  Serial.printf("Hora del Servidor:  %s\n", horaServidor.c_str());
-  Serial.println("-----------------------------------\n");
-}
+void CommsManager::ntpInit() { configTime(0, 0, "pool.ntp.org"); }

@@ -17,6 +17,8 @@ bool wifiConnected();
 bool getApi(const char *path, JsonDocument &doc);
 void mqttPublish(const char *payload);
 
-void solicitarHoraServidor();
+bool timeInit();
+
+void ntpInit();
 
 } // namespace CommsManager
