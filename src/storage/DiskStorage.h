@@ -17,17 +17,20 @@ template <size_t N, typename T> bool write(Queue<N, T> &queue) {
   if (queue.isEmpty())
     return true;
 
-  const String dirName = "/readings/" + T::getName() + "/";
+  char dirName[23];
+  snprintf(dirName, sizeof(dirName), "/readings/%s/", T::getName());
   const size_t recSize = T::size();
-  static uint32_t idx = 0;
+  static unsigned long idx = 0;
   uint8_t buffer[T::size()];
+  char path[44];
 
   while (!queue.isEmpty()) {
-    String path = dirName + "reading" + String(idx) + ".bin";
+    snprintf(path, sizeof(path), "%sreading%lu.bin", dirName,
+             (unsigned long)idx);
 
     File file = LittleFS.open(path, "a");
     if (!file) {
-      Serial.println("Couldn't open " + path);
+      Serial.printf("Couldn't open %s\n", path);
       return false;
     }
 

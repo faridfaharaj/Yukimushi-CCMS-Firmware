@@ -23,5 +23,5 @@ public:
 
   static constexpr size_t size() { return Reading::size() + sizeof(bool); }
 
-  static constexpr const char *getName() { return "CoverReading"; }
+  static constexpr const char *getName() { return "Cover"; }
 };
