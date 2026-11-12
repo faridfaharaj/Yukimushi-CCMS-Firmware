@@ -4,4 +4,6 @@
 class ShockReading : public Reading {
 public:
   explicit ShockReading(unsigned long stamp = 0) : Reading(stamp) {};
+
+  static constexpr const char *getName() { return "ShockReading"; }
 };

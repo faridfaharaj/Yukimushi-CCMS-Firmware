@@ -24,4 +24,6 @@ public:
   }
 
   static constexpr size_t size() { return Reading::size() + sizeof(float); }
+
+  static constexpr const char *getName() { return "TemperatureReading"; }
 };

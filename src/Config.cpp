@@ -4,11 +4,6 @@
 JsonDocument Config::load() {
   JsonDocument doc;
 
-  if (!LittleFS.begin()) {
-    Serial.println("ERROR: Failed to mount LittleFS");
-    return doc;
-  }
-
   File file = LittleFS.open("/config.json", "r");
 
   if (!file) {

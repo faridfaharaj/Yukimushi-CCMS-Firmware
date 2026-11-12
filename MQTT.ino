@@ -4,7 +4,9 @@
 #include "src/Messaging.h"
 #include "src/SensorProcesses.h"
 #include "src/components/ComponentRegistry.h"
+#include "src/storage/InMemoryStorage.h"
 #include <ESP8266HTTPClient.h>
+#include <LittleFS.h>
 #include <cstdio>
 
 void setup() {
@@ -12,6 +14,11 @@ void setup() {
   delay(200);
 
   // Json Configuration
+  if (!LittleFS.begin()) {
+    Serial.println(
+        "ERROR: Failed to mount LittleFS, Disk storage will be unavailable!");
+  }
+
   JsonDocument doc = Config::load();
 
   if (doc.isNull()) {
@@ -41,7 +48,12 @@ void setup() {
   ComponentRegistry::initializeComponents();
 
   SensorProcesses::init();
+<<<<<<< HEAD
   Messaging::init();
+=======
+  InMemoryStorage::init();
+
+>>>>>>> 582b752 (added writing readings to file)
 }
 
 void loop() {

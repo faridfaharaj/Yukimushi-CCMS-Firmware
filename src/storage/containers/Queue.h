@@ -40,4 +40,8 @@ public:
 
     return true;
   }
+
+  T &get(size_t idx) { return entries[idx]; }
+
+  void clear() {}
 };
