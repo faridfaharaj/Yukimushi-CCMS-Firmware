@@ -6,7 +6,7 @@
   "mqtt": {
     "server": "broker.hivemq.com",
     "port": 1883,
-    "topic_sub": "RiSa/LEDrgb2007",
-    "topic_pub": "RiSa/SensorA02007"
+    "topic_sub": "Yukimushi/DeviceCMD",
+    "topic_pub": "Yukimushi/Readings"
   }
 }
