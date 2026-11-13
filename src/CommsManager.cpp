@@ -5,7 +5,7 @@
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
 
-namespace {
+namespace CommsManager {
 
 WiFiClient mqttWifiClient{};
 PubSubClient mqttClient{mqttWifiClient};
@@ -15,7 +15,6 @@ HTTPClient httpClient{};
 
 const char *mqttServer = nullptr;
 const char *channelTopicSub = nullptr;
-const char *channelTopicPub = nullptr;
 char clientId[24];
 
 const char *serverName = nullptr;
@@ -52,14 +51,14 @@ bool mqttConnect() {
   return true;
 }
 
-} // namespace
+} // namespace CommsManager
 
 void CommsManager::wifiInit(const char *WIFI_SSID, const char *WIFI_PASSWORD) {
 
   uint8_t mac[6];
   WiFi.macAddress(mac);
-  snprintf(clientId, sizeof(clientId), "%s-%02X%02X%02X%02X%02X%02X", "Client",
-           mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+  snprintf(clientId, sizeof(clientId), "%02X%02X%02X%02X%02X%02X", mac[0],
+           mac[1], mac[2], mac[3], mac[4], mac[5]);
 
   delay(100);
   Serial.println();
@@ -105,11 +104,10 @@ void CommsManager::wifiInit(const char *WIFI_SSID, const char *WIFI_PASSWORD) {
       });
 }
 
-void CommsManager::mqttInit(const char *server, uint16_t port, const char *sub,
-                            const char *pub) {
+void CommsManager::mqttInit(const char *server, uint16_t port,
+                            const char *sub) {
   mqttServer = strdup(server);
   channelTopicSub = strdup(sub);
-  channelTopicPub = strdup(pub);
 
   mqttClient.setServer(mqttServer, port);
   mqttClient.setCallback(callback);
@@ -186,6 +184,7 @@ bool CommsManager::getApi(const char *path, JsonDocument &doc) {
   return ok;
 }
 
-bool CommsManager::mqttPublish(const uint8_t *payload, size_t len) {
-  return mqttClient.publish(channelTopicPub, payload, len);
+bool CommsManager::mqttPublish(const char *topic, const uint8_t *payload,
+                               size_t len) {
+  return mqttClient.publish(topic, payload, len);
 }

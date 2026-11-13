@@ -31,16 +31,23 @@ void setup() {
   const char *WIFI_PASSWORD = doc["wifi"]["password"] | "";
 
   const char *mqttServer = doc["mqtt"]["server"] | "";
-  const char *topicPub = doc["mqtt"]["topic_pub"] | "";
   const char *topicSub = doc["mqtt"]["topic_sub"] | "";
   uint16_t port = doc["mqtt"]["port"] | 1883;
 
   const char *httpServer = doc["server"]["url"] | "";
   const char *key = doc["server"]["api_key"] | "";
 
+  const char *topicCover = doc["mqtt"]["topic_readings"]["cover"] | "";
+  const char *topicHumidity = doc["mqtt"]["topic_readings"]["humidity"] | "";
+  const char *topicLight = doc["mqtt"]["topic_readings"]["light"] | "";
+  const char *topicTemperature =
+      doc["mqtt"]["topic_readings"]["temperature"] | "";
+  const char *topicTipped = doc["mqtt"]["topic_readings"]["tipped"] | "";
+  const char *topicShock = doc["mqtt"]["topic_readings"]["shock"] | "";
+
   // init
   CommsManager::wifiInit(WIFI_SSID, WIFI_PASSWORD);
-  CommsManager::mqttInit(mqttServer, port, topicSub, topicPub);
+  CommsManager::mqttInit(mqttServer, port, topicSub);
   CommsManager::httpInit(httpServer);
   CommsManager::setApiKey(key);
   CommsManager::ntpInit();
@@ -48,12 +55,8 @@ void setup() {
   ComponentRegistry::initializeComponents();
 
   SensorProcesses::init();
-<<<<<<< HEAD
-  Messaging::init();
-=======
-  InMemoryStorage::init();
-
->>>>>>> 582b752 (added writing readings to file)
+  Messaging::init(topicCover, topicHumidity, topicLight, topicShock,
+                  topicTemperature, topicTipped);
 }
 
 void loop() {

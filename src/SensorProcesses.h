@@ -21,12 +21,6 @@ void readbtn(unsigned long time);
 
 void init();
 
-void readLight();
-void readAcceleration();
-void readTemperature();
-void readHumidity();
-void readCovered();
-
 void update();
 
 } // namespace SensorProcesses

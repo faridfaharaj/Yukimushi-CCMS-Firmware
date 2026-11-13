@@ -20,6 +20,16 @@ public:
 
     return offset + sizeof(open);
   }
+  
+  static CoverReading deserialize(const uint8_t *buffer) {
+    unsigned long stamp;
+    memcpy(&stamp, buffer, sizeof(stamp));
+
+    bool isOpen;
+    memcpy(&isOpen, buffer + Reading::size(), sizeof(isOpen));
+
+    return CoverReading(stamp, isOpen);
+  }
 
   static constexpr size_t size() { return Reading::size() + sizeof(bool); }
 

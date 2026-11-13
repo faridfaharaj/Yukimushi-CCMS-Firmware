@@ -8,8 +8,6 @@
 
 namespace InMemoryStorage {
 
-void init();
-
 void store(const HumidityReading &r);
 void store(const TemperatureReading &r);
 void store(const LightReading &r);

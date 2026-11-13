@@ -21,6 +21,16 @@ public:
     return offset + sizeof(humidityPercentage);
   }
 
+  static HumidityReading deserialize(const uint8_t *buffer) {
+    unsigned long stamp;
+    memcpy(&stamp, buffer, sizeof(stamp));
+
+    float value;
+    memcpy(&value, buffer + Reading::size(), sizeof(value));
+
+    return HumidityReading(stamp, value);
+  }
+
   static constexpr size_t size() { return Reading::size() + sizeof(float); }
 
   static constexpr const char *getName() { return "Humidity"; }

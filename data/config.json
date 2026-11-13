@@ -1,12 +1,19 @@
 {
   "wifi": {
-    "ssid": "<WIFI_SSID>",
-    "password": "<WIFI_PASSWORD>"
+    "ssid": "Tec-IoT",
+    "password": "spotless.magnetic.bridge"
   },
   "mqtt": {
     "server": "broker.hivemq.com",
     "port": 1883,
     "topic_sub": "Yukimushi/DeviceCMD",
-    "topic_pub": "Yukimushi/Readings"
+    "topic_readings": {
+      "cover": "Yukimushi/Readings/cover",
+      "humidity": "Yukimushi/Readings/humidity",
+      "light": "Yukimushi/Readings/light",
+      "shock": "Yukimushi/Readings/shock",
+      "temperature": "Yukimushi/Readings/temperature",
+      "tipped": "Yukimushi/Readings/tipped"
+    }
   }
 }
