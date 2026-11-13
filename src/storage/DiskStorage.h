@@ -9,10 +9,6 @@ namespace DiskStorage {
 // 4096 = 4KB
 constexpr size_t MAXBYTESIZE = 24;
 
-void read();
-void RemoveFile();
-void removeFirst();
-
 template <size_t N, typename T> bool write(Queue<N, T> &queue) {
   if (queue.isEmpty())
     return true;
@@ -51,6 +47,36 @@ template <size_t N, typename T> bool write(Queue<N, T> &queue) {
   }
 
   return true;
+}
+
+template <size_t N, typename T> bool load(Queue<N, T> &queue) {
+  char dirName[23];
+  snprintf(dirName, sizeof(dirName), "/readings/%s/", T::getName());
+  const size_t recSize = T::size();
+  uint8_t buffer[T::size()];
+
+  while (true) {
+    File dir = LittleFS.open(dirName, "r");
+    if (!dir || !dir.isDirectory())
+      return true;
+
+    File file = dir.openNextFile();
+    if (!file) {
+      dir.close();
+      return true;
+    }
+
+    char path[44];
+    snprintf(path, sizeof(path), "%s%s", dirName, file.name());
+    dir.close();
+
+    while (file.read(buffer, recSize) == recSize) {
+      queue.push(T::deserialize(buffer));
+    }
+
+    file.close();
+    LittleFS.remove(path);
+  }
 }
 
 } // namespace DiskStorage

@@ -15,7 +15,7 @@ Event<4, ShockReading &> onShock;
 Event<4, CoverReading &> onCoverChanged;
 
 constexpr unsigned long LIGHT_RATE_MS = 60000;
-
+// 600000
 constexpr unsigned long ACCELERATION_RATE_MS = 20;
 constexpr unsigned long SHOCK_COOLDOWN_MS = 500;
 constexpr float SHOCK_THRESHOLD_G = 2.0f;

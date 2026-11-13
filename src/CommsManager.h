@@ -1,8 +1,11 @@
 #pragma once
+#include "Event.h"
 #include <ArduinoJson.h>
 #include <stdint.h>
 
 namespace CommsManager {
+
+extern Event<1> onMQTTconnected;
 
 void wifiInit(const char *WIFI_SSID, const char *WIFI_PASSWORD);
 void mqttInit(const char *server, uint16_t port, const char *sub,

@@ -1,6 +1,5 @@
 #include "CommsManager.h"
 #include "core_esp8266_features.h"
-
 #include <Arduino.h>
 #include <ESP8266HTTPClient.h>
 #include <ESP8266WiFi.h>
@@ -22,8 +21,10 @@ char clientId[24];
 const char *serverName = nullptr;
 const char *apiKey = nullptr;
 
-WiFiEventHandler onConnected;
-WiFiEventHandler onDisconnected;
+WiFiEventHandler onWifiConnected;
+WiFiEventHandler onWifiDisconnected;
+
+Event<1> onMQTTconnected;
 
 // only for debugging, delete later maybe?
 bool hadMQTT = false;
@@ -47,6 +48,7 @@ bool mqttConnect() {
   if (!mqttClient.connect(clientId))
     return false;
   mqttClient.subscribe(channelTopicSub);
+  onMQTTconnected.emit();
   return true;
 }
 
@@ -93,10 +95,11 @@ void CommsManager::wifiInit(const char *WIFI_SSID, const char *WIFI_PASSWORD) {
   Serial.print("IP address: ");
   Serial.println(WiFi.localIP());
 
-  onConnected = WiFi.onStationModeGotIP([](const WiFiEventStationModeGotIP &) {
-    Serial.println("wifi Connected!");
-  });
-  onDisconnected = WiFi.onStationModeDisconnected(
+  onWifiConnected =
+      WiFi.onStationModeGotIP([](const WiFiEventStationModeGotIP &) {
+        Serial.println("wifi Connected!");
+      });
+  onWifiDisconnected = WiFi.onStationModeDisconnected(
       [](const WiFiEventStationModeDisconnected &) {
         Serial.println("Wifi Connection lost, Reconnecting...");
       });
