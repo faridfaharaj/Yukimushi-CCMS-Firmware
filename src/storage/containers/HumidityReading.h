@@ -6,8 +6,10 @@ private:
   float humidityPercentage;
 
 public:
-  explicit HumidityReading(float humidityPercentage = 0.0f)
-      : Reading(), humidityPercentage(humidityPercentage) {}
+  explicit HumidityReading(unsigned long stamp, float humidityPercentage)
+      : Reading(stamp), humidityPercentage(humidityPercentage) {}
+
+  explicit HumidityReading() : Reading(0), humidityPercentage(0.0f) {}
 
   float getHumidityPercentage() const { return humidityPercentage; }
 

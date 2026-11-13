@@ -37,16 +37,22 @@ void callback(char *topic, byte *payload, unsigned int length) {
   // do stuff
 }
 
+bool mqttConnect() {
+  static unsigned long lastTry = millis() - 5000;
+  if (millis() - lastTry < 5000)
+    return false;
+  lastTry = millis();
+
+  mqttWifiClient.stop();
+  if (!mqttClient.connect(clientId))
+    return false;
+  mqttClient.subscribe(channelTopicSub);
+  return true;
+}
+
 } // namespace
 
 void CommsManager::wifiInit(const char *WIFI_SSID, const char *WIFI_PASSWORD) {
-  onConnected = WiFi.onStationModeGotIP([](const WiFiEventStationModeGotIP &) {
-    Serial.println("wifi Connected!");
-  });
-  onDisconnected = WiFi.onStationModeDisconnected(
-      [](const WiFiEventStationModeDisconnected &) {
-        Serial.println("Wifi Connection lost!");
-      });
 
   uint8_t mac[6];
   WiFi.macAddress(mac);
@@ -86,6 +92,14 @@ void CommsManager::wifiInit(const char *WIFI_SSID, const char *WIFI_PASSWORD) {
   Serial.println("WiFi connnected!");
   Serial.print("IP address: ");
   Serial.println(WiFi.localIP());
+
+  onConnected = WiFi.onStationModeGotIP([](const WiFiEventStationModeGotIP &) {
+    Serial.println("wifi Connected!");
+  });
+  onDisconnected = WiFi.onStationModeDisconnected(
+      [](const WiFiEventStationModeDisconnected &) {
+        Serial.println("Wifi Connection lost, Reconnecting...");
+      });
 }
 
 void CommsManager::mqttInit(const char *server, uint16_t port, const char *sub,
@@ -115,23 +129,12 @@ void CommsManager::httpInit(const char *serverURL) {
   serverName = strdup(serverURL);
 }
 
+void CommsManager::ntpInit() { configTime(0, 0, "pool.ntp.org"); }
+
 void CommsManager::setApiKey(const char *key) { apiKey = strdup(key); }
 
-bool CommsManager::mqttConnect() {
-  static unsigned long lastTry = millis() - 5000;
-  if (millis() - lastTry < 5000)
-    return false;
-  lastTry = millis();
-
-  mqttWifiClient.stop();
-  if (!mqttClient.connect(clientId))
-    return false;
-  mqttClient.subscribe(channelTopicSub);
-  return true;
-}
-
 void CommsManager::update() {
-  bool hasMQTT = mqttClient.connected();
+  bool hasMQTT = CommsManager::mqttConnected();
   if (!hasMQTT && wifiConnected()) {
     hasMQTT = mqttConnect();
   }
@@ -148,6 +151,7 @@ void CommsManager::update() {
 }
 
 bool CommsManager::wifiConnected() { return WiFi.status() == WL_CONNECTED; }
+bool CommsManager::mqttConnected() { return mqttClient.connected(); }
 
 bool CommsManager::getApi(const char *path, JsonDocument &doc) {
   String url = String(serverName) + path;
@@ -179,19 +183,6 @@ bool CommsManager::getApi(const char *path, JsonDocument &doc) {
   return ok;
 }
 
-void CommsManager::mqttPublish(const char *payload) {
-  char msg[64];
-
-  int n = snprintf(msg, sizeof(msg), "%s: %s", clientId, payload);
-  if (n < 0 || n >= (int)sizeof(msg)) {
-    Serial.println("Message " + String(payload) +
-                   " exeeds size limit: " + sizeof(msg));
-    return;
-  }
-
-  if (!mqttClient.publish(channelTopicPub, msg)) {
-    Serial.println("Failed to publish: " + String(payload));
-  }
+bool CommsManager::mqttPublish(const uint8_t *payload, size_t len) {
+  return mqttClient.publish(channelTopicPub, payload, len);
 }
-
-void CommsManager::ntpInit() { configTime(0, 0, "pool.ntp.org"); }

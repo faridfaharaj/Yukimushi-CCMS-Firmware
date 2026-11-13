@@ -6,7 +6,7 @@ private:
   unsigned long timeStamp;
 
 public:
-  Reading() : timeStamp(millis()) {}
+  Reading(unsigned long stamp) : timeStamp(stamp) {}
 
   unsigned long getTimeStamp() const { return timeStamp; }
 

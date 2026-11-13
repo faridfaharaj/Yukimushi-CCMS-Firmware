@@ -6,8 +6,10 @@ private:
   float celsius;
 
 public:
-  explicit TemperatureReading(float degrees = 0.0f)
-      : Reading(), celsius(degrees) {}
+  explicit TemperatureReading(unsigned long stamp, float degrees)
+      : Reading(stamp), celsius(degrees) {}
+
+  explicit TemperatureReading() : Reading(0), celsius(0.0f) {}
 
   float getDegrees() const { return celsius; }
 

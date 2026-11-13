@@ -19,51 +19,45 @@ Queue<666, CoverReading> cover;
 Queue<833, ShockReading> shock;
 Queue<833, TippedReading> Tipped;
 
-void storeCover(bool reading) {
+void storeCover(CoverReading coverR) {
   if (cover.isFull())
     return;
 
-  CoverReading coverR(reading);
   cover.push(coverR);
 }
 
-void storeHumidity(float reading) {
+void storeHumidity(HumidityReading humidityR) {
   if (Humidity.isFull())
     return;
 
-  HumidityReading humidityR(reading);
   Humidity.push(humidityR);
 }
 
-void storeLight(float reading) {
+void storeLight(LightReading lightR) {
   if (light.isFull())
     return;
 
-  LightReading lightR(reading);
   light.push(lightR);
 }
 
-void storeShock() {
+void storeShock(ShockReading shockR) {
   if (shock.isFull())
     return;
 
-  ShockReading shockR;
   shock.push(shockR);
 }
 
-void storeTemperature(float reading) {
+void storeTemperature(TemperatureReading temperatureR) {
   if (temperature.isFull())
     return;
 
-  TemperatureReading temperatureR(reading);
   temperature.push(temperatureR);
 }
 
-void storeTipped(float reading) {
+void storeTipped(TippedReading tippedR) {
   if (Tipped.isFull())
     return;
 
-  TippedReading tippedR;
   Tipped.push(tippedR);
 }
 

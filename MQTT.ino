@@ -1,6 +1,7 @@
 #include "HardwareSerial.h"
 #include "src/CommsManager.h"
 #include "src/Config.h"
+#include "src/Messaging.h"
 #include "src/SensorProcesses.h"
 #include "src/components/ComponentRegistry.h"
 #include <ESP8266HTTPClient.h>
@@ -32,7 +33,7 @@ void setup() {
 
   // init
   CommsManager::wifiInit(WIFI_SSID, WIFI_PASSWORD);
-  CommsManager::mqttInit(mqttServer, port, topicPub, topicSub);
+  CommsManager::mqttInit(mqttServer, port, topicSub, topicPub);
   CommsManager::httpInit(httpServer);
   CommsManager::setApiKey(key);
   CommsManager::ntpInit();
@@ -40,6 +41,7 @@ void setup() {
   ComponentRegistry::initializeComponents();
 
   SensorProcesses::init();
+  Messaging::init();
 }
 
 void loop() {

@@ -6,7 +6,10 @@ private:
   bool open;
 
 public:
-  explicit CoverReading(bool open = false) : Reading(), open(open) {}
+  explicit CoverReading(unsigned long stamp, bool open)
+      : Reading(stamp), open(open) {}
+
+  explicit CoverReading() : Reading(0), open(false) {}
 
   bool getOpen() const { return open; }
 

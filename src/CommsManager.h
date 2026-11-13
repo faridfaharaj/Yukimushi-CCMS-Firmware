@@ -10,12 +10,12 @@ void mqttInit(const char *server, uint16_t port, const char *sub,
 void httpInit(const char *serverURL);
 void setApiKey(const char *key);
 
-bool mqttConnect();
 void update();
 bool wifiConnected();
+bool mqttConnected();
 
 bool getApi(const char *path, JsonDocument &doc);
-void mqttPublish(const char *payload);
+bool mqttPublish(const uint8_t *payload, size_t size);
 
 bool timeInit();
 

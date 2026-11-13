@@ -4,15 +4,15 @@
 #include <cmath>
 
 namespace SensorProcesses {
-Event<4, float> onReadLight;
-Event<4, float> onReadHumidity;
-Event<4, float> onReadTemperature;
+Event<4, LightReading> onReadLight;
+Event<4, HumidityReading> onReadHumidity;
+Event<4, TemperatureReading> onReadTemperature;
 
-Event<4, float> onTipped;
+Event<4, TippedReading> onTipped;
 // NOTE: shock GY-61 can only read up to 3g so shock magnitude cannot really be
 // measured unless we have a better sensor
-Event<4> onShock;
-Event<4, bool> onCoverChanged;
+Event<4, ShockReading> onShock;
+Event<4, CoverReading> onCoverChanged;
 
 constexpr unsigned long LIGHT_RATE_MS = 60000;
 
@@ -24,7 +24,7 @@ constexpr int TILT_SAMPLES = 50;
 
 constexpr unsigned long TEMPERATURE_RATE_MS = 600000;
 
-constexpr unsigned long HUMIDITY_RATE_MS = 600000;
+constexpr unsigned long HUMIDITY_RATE_MS = 500;
 
 constexpr unsigned long COVER_RATE_MS = 1000;
 constexpr unsigned long COVER_DISTANCE_CM = 3;
@@ -35,7 +35,9 @@ void readLight() {
     return;
 
   float lux = ComponentRegistry::ldr.readLux();
-  onReadLight.emit(lux);
+
+  LightReading lightR(time(nullptr), lux);
+  onReadLight.emit(lightR);
 }
 
 void readAcceleration() {
@@ -53,7 +55,9 @@ void readAcceleration() {
   if (mag2 >= SHOCK_THRESHOLD_G * SHOCK_THRESHOLD_G &&
       cooldownDue(shockCooldown, SHOCK_COOLDOWN_MS)) {
     shockCooldown = millis();
-    onShock.emit();
+
+    ShockReading shockR(time(nullptr));
+    onShock.emit(shockR);
   }
 
   // Tilt
@@ -70,8 +74,10 @@ void readAcceleration() {
   sx += accX;
   sy += accY;
   sz += accZ;
+
   if (++n < TILT_SAMPLES)
     return;
+
   float ax = sx / n, ay = sy / n, az = sz / n;
   sx = sy = sz = 0;
   n = 0;
@@ -80,6 +86,7 @@ void readAcceleration() {
 
   static float baseX, baseY, baseZ;
   static bool haveBase = false;
+
   if (!haveBase) {
     baseX = ax;
     baseY = ay;
@@ -95,10 +102,13 @@ void readAcceleration() {
 
   static bool wasTipped = false;
   bool hasTipped = change > TIPPED_DEGREES;
+
   if (wasTipped != hasTipped) {
     wasTipped = hasTipped;
+
     if (hasTipped) {
-      onTipped.emit(change);
+      TippedReading tippedR(time(nullptr));
+      onTipped.emit(tippedR);
     }
   }
 }
@@ -109,7 +119,9 @@ void readTemperature() {
     return;
 
   float degrees = ComponentRegistry::tempHumSensor.readTemperature();
-  onReadTemperature.emit(degrees);
+
+  TemperatureReading temperatureR(time(nullptr), degrees);
+  onReadTemperature.emit(temperatureR);
 }
 
 void readHumidity() {
@@ -118,7 +130,9 @@ void readHumidity() {
     return;
 
   float humidity = ComponentRegistry::tempHumSensor.readHumidity();
-  onReadHumidity.emit(humidity);
+
+  HumidityReading humidityR(time(nullptr), humidity);
+  onReadHumidity.emit(humidityR);
 }
 
 void readCovered() {
@@ -128,10 +142,14 @@ void readCovered() {
 
   unsigned int cm = ComponentRegistry::distanceSensor.ping_cm();
   bool hasCovered = cm > COVER_DISTANCE_CM;
+
   static bool wasCovered = hasCovered;
+
   if (wasCovered != hasCovered) {
-    onCoverChanged.emit(cm > COVER_DISTANCE_CM);
+    CoverReading coverR(time(nullptr), hasCovered);
+    onCoverChanged.emit(coverR);
   }
+
   wasCovered = hasCovered;
 }
 

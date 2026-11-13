@@ -6,7 +6,10 @@ private:
   float lux;
 
 public:
-  explicit LightReading(float lux = 0.0f) : Reading(), lux(lux) {}
+  explicit LightReading(unsigned long stamp, float lux)
+      : Reading(stamp), lux(lux) {}
+
+  explicit LightReading() : Reading(0), lux(0.0f) {}
 
   float getLux() const { return lux; }
 
