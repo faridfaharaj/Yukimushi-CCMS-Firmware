@@ -9,13 +9,13 @@
 
 namespace SensorProcesses {
 
-extern Event<4, LightReading> onReadLight;
-extern Event<4, HumidityReading> onReadHumidity;
-extern Event<4, TemperatureReading> onReadTemperature;
+extern Event<4, LightReading &> onReadLight;
+extern Event<4, HumidityReading &> onReadHumidity;
+extern Event<4, TemperatureReading &> onReadTemperature;
 
-extern Event<4, TippedReading> onTipped;
-extern Event<4, ShockReading> onShock;
-extern Event<4, CoverReading> onCoverChanged;
+extern Event<4, TippedReading &> onTipped;
+extern Event<4, ShockReading &> onShock;
+extern Event<4, CoverReading &> onCoverChanged;
 
 void readbtn(unsigned long time);
 

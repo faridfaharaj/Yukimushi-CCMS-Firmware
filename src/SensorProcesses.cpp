@@ -4,15 +4,15 @@
 #include <cmath>
 
 namespace SensorProcesses {
-Event<4, LightReading> onReadLight;
-Event<4, HumidityReading> onReadHumidity;
-Event<4, TemperatureReading> onReadTemperature;
+Event<4, LightReading &> onReadLight;
+Event<4, HumidityReading &> onReadHumidity;
+Event<4, TemperatureReading &> onReadTemperature;
 
-Event<4, TippedReading> onTipped;
+Event<4, TippedReading &> onTipped;
 // NOTE: shock GY-61 can only read up to 3g so shock magnitude cannot really be
 // measured unless we have a better sensor
-Event<4, ShockReading> onShock;
-Event<4, CoverReading> onCoverChanged;
+Event<4, ShockReading &> onShock;
+Event<4, CoverReading &> onCoverChanged;
 
 constexpr unsigned long LIGHT_RATE_MS = 60000;
 
