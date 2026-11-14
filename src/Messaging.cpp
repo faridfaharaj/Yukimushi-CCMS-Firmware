@@ -61,7 +61,9 @@ template <typename T> void publishStored() {
   } while (InMemoryStorage::fill(reading));
 }
 
-void publishStorage() {
+} // namespace Messaging
+
+void Messaging::publishStorage() {
   publishStored<HumidityReading>();
   publishStored<TemperatureReading>();
   publishStored<LightReading>();
@@ -69,8 +71,6 @@ void publishStorage() {
   publishStored<ShockReading>();
   publishStored<TippedReading>();
 }
-
-} // namespace Messaging
 
 void Messaging::init(const char *topicCover, const char *topicHumidity,
                      const char *topicLight, const char *topicShock,

@@ -4,7 +4,6 @@
 #include "src/Messaging.h"
 #include "src/SensorProcesses.h"
 #include "src/components/ComponentRegistry.h"
-#include "src/storage/InMemoryStorage.h"
 #include <ESP8266HTTPClient.h>
 #include <LittleFS.h>
 #include <cstdio>
@@ -57,6 +56,8 @@ void setup() {
   SensorProcesses::init();
   Messaging::init(topicCover, topicHumidity, topicLight, topicShock,
                   topicTemperature, topicTipped);
+
+  Messaging::publishStorage();
 }
 
 void loop() {
