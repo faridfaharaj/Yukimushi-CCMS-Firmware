@@ -40,7 +40,6 @@ template <size_t N, typename T> bool diskFill(Queue<N, T> &q) {
     return false;
 
   return DiskStorage::load(q);
-  return true;
 }
 
 bool load(HumidityReading &r) { return retrieve(humidity, r); }

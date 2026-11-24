@@ -8,16 +8,16 @@ namespace ComponentRegistry {
 
 constexpr unsigned int MAX_DISTANCE = 400;
 DHT tempHumSensor(D1, DHT11);
-NewPing distanceSensor(D2, D5, MAX_DISTANCE);
+NewPing distanceSensor(D5, D6, MAX_DISTANCE);
 
-InPullupPin btnPin(D3);
+InPullupPin btnPin(D8);
 Button btn(btnPin);
 
-OutPin ledPin(D4);
+OutPin ledPin(D7);
 LED led(ledPin);
 
 InPin muxZ(A0);
-OutPin muxS0(D6), muxS1(D7);
+OutPin muxS0(D2), muxS1(D3);
 Multiplexer multiplexer(muxZ, muxS0, muxS1);
 
 PlexedInPin accX(multiplexer, 0), accY(multiplexer, 1), accZ(multiplexer, 2);

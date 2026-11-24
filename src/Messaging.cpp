@@ -24,7 +24,7 @@ template <typename T> bool publishReadingBase(T &reading, const char *topic) {
 }
 
 bool publishReading(HumidityReading &reading) {
-  return publishReadingBase(reading, channelTopicCover);
+  return publishReadingBase(reading, channelTopicHumidity);
 }
 bool publishReading(TemperatureReading &reading) {
   return publishReadingBase(reading, channelTopicTemperature);
@@ -72,16 +72,46 @@ void Messaging::publishStorage() {
   publishStored<TippedReading>();
 }
 
+void fillTopic(const char *tmpl, const char *device, const char *&outChar) {
+  const char *token = "{device}";
+  const char *hit = strstr(tmpl, token);
+
+  size_t len = strlen(tmpl);
+  if (hit)
+    len = len - strlen(token) + strlen(device);
+
+  char *out = (char *)malloc(len + 1);
+  if (!out) {
+    outChar = nullptr;
+    return;
+  }
+
+  if (!hit) {
+    strcpy(out, tmpl);
+  } else {
+    size_t prefix = hit - tmpl;
+    memcpy(out, tmpl, prefix);
+    strcpy(out + prefix, device);
+    strcpy(out + prefix + strlen(device), hit + strlen(token));
+  }
+
+  outChar = out;
+}
+
 void Messaging::init(const char *topicCover, const char *topicHumidity,
                      const char *topicLight, const char *topicShock,
                      const char *topicTemperature, const char *topicTipped) {
 
-  channelTopicCover = strdup(topicCover);
-  channelTopicHumidity = strdup(topicHumidity);
-  channelTopicLight = strdup(topicLight);
-  channelTopicShock = strdup(topicShock);
-  channelTopicTemperature = strdup(topicTemperature);
-  channelTopicTipped = strdup(topicTipped);
+  String addr = WiFi.macAddress();
+  addr.replace(":", "");
+  const char *charMac = addr.c_str();
+
+  fillTopic(topicCover, charMac, channelTopicCover);
+  fillTopic(topicHumidity, charMac, channelTopicHumidity);
+  fillTopic(topicLight, charMac, channelTopicLight);
+  fillTopic(topicShock, charMac, channelTopicShock);
+  fillTopic(topicTemperature, charMac, channelTopicTemperature);
+  fillTopic(topicTipped, charMac, channelTopicTipped);
 
   CommsManager::onMQTTconnected.subscribe(publishStorage);
   SensorProcesses::onReadHumidity.subscribe(processReading<HumidityReading>);

@@ -16,14 +16,14 @@ Event<4, CoverReading &> onCoverChanged;
 
 constexpr unsigned long LIGHT_RATE_MS = 60000;
 constexpr unsigned long ACCELERATION_RATE_MS = 20;
-constexpr unsigned long SHOCK_COOLDOWN_MS = 500;
+constexpr unsigned long SHOCK_COOLDOWN_MS = 1000;
 constexpr float SHOCK_THRESHOLD_G = 2.0f;
 constexpr float TIPPED_DEGREES = 45.0f;
 constexpr int TILT_SAMPLES = 50;
 
 constexpr unsigned long TEMPERATURE_RATE_MS = 600000;
 
-constexpr unsigned long HUMIDITY_RATE_MS = 500;
+constexpr unsigned long HUMIDITY_RATE_MS = 60000;
 
 constexpr unsigned long COVER_RATE_MS = 1000;
 constexpr unsigned long COVER_DISTANCE_CM = 3;

@@ -52,31 +52,45 @@ template <size_t N, typename T> bool write(Queue<N, T> &queue) {
 template <size_t N, typename T> bool load(Queue<N, T> &queue) {
   char dirName[23];
   snprintf(dirName, sizeof(dirName), "/readings/%s/", T::getName());
+
   const size_t recSize = T::size();
   uint8_t buffer[T::size()];
 
-  while (true) {
-    File dir = LittleFS.open(dirName, "r");
-    if (!dir || !dir.isDirectory())
-      return true;
+  File dir = LittleFS.open(dirName, "r");
 
-    File file = dir.openNextFile();
-    if (!file) {
+  if (!dir || !dir.isDirectory()) {
+    if (dir)
       dir.close();
-      return true;
-    }
-
-    char path[44];
-    snprintf(path, sizeof(path), "%s%s", dirName, file.name());
-    dir.close();
-
-    while (file.read(buffer, recSize) == recSize) {
-      queue.push(T::deserialize(buffer));
-    }
-
-    file.close();
-    LittleFS.remove(path);
+    return false;
   }
+
+  File file = dir.openNextFile();
+
+  if (!file) {
+    dir.close();
+    return false;
+  }
+
+  char path[44];
+  snprintf(path, sizeof(path), "%s%s", dirName, file.name());
+
+  size_t remaining = file.size() - file.position();
+
+  while (!queue.isFull() && remaining >= recSize) {
+    if (file.read(buffer, recSize) != recSize)
+      break;
+
+    queue.push(T::deserialize(buffer));
+    remaining -= recSize;
+  }
+
+  file.close();
+  dir.close();
+
+  if (remaining == 0)
+    LittleFS.remove(path);
+
+  return !queue.isEmpty();
 }
 
 } // namespace DiskStorage
