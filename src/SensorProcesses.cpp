@@ -154,12 +154,8 @@ void readCovered() {
 
 } // namespace SensorProcesses
 
-void SensorProcesses::readbtn(unsigned long time) {
-  Serial.println("ButtonPressed! for: " + String(time) + "ms");
-}
-
 void SensorProcesses::init() {
-  ComponentRegistry::btn.onRelease.subscribe(readbtn);
+
 }
 
 void SensorProcesses::update() {

@@ -10,12 +10,6 @@ constexpr unsigned int MAX_DISTANCE = 400;
 DHT tempHumSensor(D1, DHT11);
 NewPing distanceSensor(D5, D6, MAX_DISTANCE);
 
-InPullupPin btnPin(D8);
-Button btn(btnPin);
-
-OutPin ledPin(D7);
-LED led(ledPin);
-
 InPin muxZ(A0);
 OutPin muxS0(D2), muxS1(D3);
 Multiplexer multiplexer(muxZ, muxS0, muxS1);
@@ -29,7 +23,6 @@ LDR ldr(ldrPin, 330, true);
 void initializeComponents() {
   tempHumSensor.begin();
   accelerometer.init();
-  btn.init();
 }
 
 } // namespace ComponentRegistry
