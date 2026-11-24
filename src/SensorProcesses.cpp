@@ -4,15 +4,6 @@
 #include <cmath>
 
 namespace SensorProcesses {
-Event<4, LightReading &> onReadLight;
-Event<4, HumidityReading &> onReadHumidity;
-Event<4, TemperatureReading &> onReadTemperature;
-
-Event<4, TippedReading &> onTipped;
-// NOTE: shock GY-61 can only read up to 3g so shock magnitude cannot really be
-// measured unless we have a better sensor
-Event<4, ShockReading &> onShock;
-Event<4, CoverReading &> onCoverChanged;
 
 constexpr unsigned long LIGHT_RATE_MS = 60000;
 constexpr unsigned long ACCELERATION_RATE_MS = 20;
@@ -28,7 +19,27 @@ constexpr unsigned long HUMIDITY_RATE_MS = 60000;
 constexpr unsigned long COVER_RATE_MS = 1000;
 constexpr unsigned long COVER_DISTANCE_CM = 3;
 
+bool humidityNTemperatureEnabled;
+bool accelerationEnabled;
+bool lightEnabled;
+bool proximityEnabled;
+bool geospatialEnabled;
+bool bluetoothEnabled;
+
+Event<4, LightReading &> onReadLight;
+Event<4, HumidityReading &> onReadHumidity;
+Event<4, TemperatureReading &> onReadTemperature;
+
+Event<4, TippedReading &> onTipped;
+// NOTE: shock GY-61 can only read up to 3g so shock magnitude cannot really be
+// measured unless we have a better sensor
+Event<4, ShockReading &> onShock;
+Event<4, CoverReading &> onCoverChanged;
+
 void readLight() {
+  if (!lightEnabled)
+    return;
+
   static unsigned long last = 0;
   if (!due(last, LIGHT_RATE_MS))
     return;
@@ -40,6 +51,9 @@ void readLight() {
 }
 
 void readAcceleration() {
+  if (!accelerationEnabled)
+    return;
+
   static unsigned long last = 0;
   if (!due(last, ACCELERATION_RATE_MS))
     return;
@@ -74,8 +88,7 @@ void readAcceleration() {
   sy += accY;
   sz += accZ;
 
-  if (++n < TILT_SAMPLES)
-    return;
+  return;
 
   float ax = sx / n, ay = sy / n, az = sz / n;
   sx = sy = sz = 0;
@@ -113,6 +126,9 @@ void readAcceleration() {
 }
 
 void readTemperature() {
+  if (!humidityNTemperatureEnabled)
+    return;
+
   static unsigned long last = 0;
   if (!due(last, TEMPERATURE_RATE_MS))
     return;
@@ -124,6 +140,9 @@ void readTemperature() {
 }
 
 void readHumidity() {
+  if (!humidityNTemperatureEnabled)
+    return;
+
   static unsigned long last = 0;
   if (!due(last, HUMIDITY_RATE_MS))
     return;
@@ -135,6 +154,9 @@ void readHumidity() {
 }
 
 void readCovered() {
+  if (!proximityEnabled)
+    return;
+
   static unsigned long last = 0;
   if (!due(last, COVER_RATE_MS))
     return;
@@ -154,8 +176,15 @@ void readCovered() {
 
 } // namespace SensorProcesses
 
-void SensorProcesses::init() {
+void SensorProcesses::init(bool enableHumidityNTemperature,
+                           bool enableAcceleration, bool enableLight,
+                           bool enableProximity, bool enableGeospatial) {
 
+  humidityNTemperatureEnabled = enableHumidityNTemperature;
+  accelerationEnabled = enableAcceleration;
+  lightEnabled = enableLight;
+  proximityEnabled = enableProximity;
+  geospatialEnabled = enableGeospatial;
 }
 
 void SensorProcesses::update() {

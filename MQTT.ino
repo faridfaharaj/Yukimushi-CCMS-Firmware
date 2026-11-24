@@ -44,6 +44,14 @@ void setup() {
   const char *topicTipped = doc["mqtt"]["topic_readings"]["tipped"] | "";
   const char *topicShock = doc["mqtt"]["topic_readings"]["shock"] | "";
 
+  bool humidityNTemperatureEnabled =
+      doc["components"]["humidityNTemperature"]["enable"] | true;
+  bool accelerationEnabled = doc["components"]["acceleration"]["enable"] | true;
+  bool lightEnabled = doc["components"]["light"]["enable"] | true;
+  bool proximityEnabled = doc["components"]["proximity"]["enable"] | true;
+  bool geospatialEnabled = doc["components"]["geospatial"]["enable"] | true;
+  bool bluetoothEnabled = doc["components"]["bluetooth"]["enable"] | true;
+
   // init
   CommsManager::wifiInit(WIFI_SSID, WIFI_PASSWORD);
   CommsManager::mqttInit(mqttServer, port, topicSub);
@@ -53,7 +61,8 @@ void setup() {
 
   ComponentRegistry::initializeComponents();
 
-  SensorProcesses::init();
+  SensorProcesses::init(humidityNTemperatureEnabled, accelerationEnabled,
+                        lightEnabled, proximityEnabled, geospatialEnabled);
   Messaging::init(topicCover, topicHumidity, topicLight, topicShock,
                   topicTemperature, topicTipped);
 

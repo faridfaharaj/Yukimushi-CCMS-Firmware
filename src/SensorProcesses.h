@@ -19,7 +19,8 @@ extern Event<4, CoverReading &> onCoverChanged;
 
 void readbtn(unsigned long time);
 
-void init();
+void init(bool enableHumidityNTemperature, bool enableAcceleration,
+          bool enableLight, bool enableProximity, bool enableGeospatial);
 
 void update();
 

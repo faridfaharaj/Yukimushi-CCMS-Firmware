@@ -15,5 +15,25 @@
       "temperature": "yukimushi/readings/{device}/temperature",
       "tipped": "yukimushi/readings/{device}/tipped"
     }
+  },
+  "components": {
+    "humidityNTemperature": {
+      "enable": true
+    },
+    "acceleration": {
+      "enable": true
+    },
+    "light": {
+      "enable": true
+    },
+    "proximity": {
+      "enable": true
+    },
+    "geospatial": {
+      "enable": true
+    },
+    "bluetooth": {
+      "enable": true
+    }
   }
 }
