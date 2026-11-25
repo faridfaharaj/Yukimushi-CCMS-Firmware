@@ -13,7 +13,8 @@
       "light": "yukimushi/readings/{device}/light",
       "shock": "yukimushi/readings/{device}/shock",
       "temperature": "yukimushi/readings/{device}/temperature",
-      "tipped": "yukimushi/readings/{device}/tipped"
+      "tipped": "yukimushi/readings/{device}/tipped",
+      "geospatial": "yukimushi/readings/{device}/geospatial"
     }
   },
   "components": {

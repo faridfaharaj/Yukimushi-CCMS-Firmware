@@ -3,14 +3,13 @@
 
 namespace InMemoryStorage {
 
-Queue<416, HumidityReading> humidity;
-Queue<416, TemperatureReading> temperature;
-Queue<416, LightReading> light;
-
-Queue<666, CoverReading> cover;
-
-Queue<833, ShockReading> shock;
-Queue<833, TippedReading> tipped;
+Queue<576, GeospatialReading> geospatial;
+Queue<576, HumidityReading> humidity;
+Queue<576, TemperatureReading> temperature;
+Queue<576, LightReading> light;
+Queue<576, CoverReading> cover;
+Queue<576, ShockReading> shock;
+Queue<576, TippedReading> tipped;
 
 template <size_t N, typename T> void push(Queue<N, T> &q, const T &reading) {
   if (q.isFull() && !DiskStorage::write<N, T>(q))
@@ -18,6 +17,7 @@ template <size_t N, typename T> void push(Queue<N, T> &q, const T &reading) {
   q.push(reading);
 }
 
+void store(const GeospatialReading &r) { push(geospatial, r); }
 void store(const HumidityReading &r) { push(humidity, r); }
 void store(const TemperatureReading &r) { push(temperature, r); }
 void store(const LightReading &r) { push(light, r); }
@@ -42,6 +42,7 @@ template <size_t N, typename T> bool diskFill(Queue<N, T> &q) {
   return DiskStorage::load(q);
 }
 
+bool load(GeospatialReading &r) { return retrieve(geospatial, r); }
 bool load(HumidityReading &r) { return retrieve(humidity, r); }
 bool load(TemperatureReading &r) { return retrieve(temperature, r); }
 bool load(LightReading &r) { return retrieve(light, r); }
@@ -49,6 +50,7 @@ bool load(CoverReading &r) { return retrieve(cover, r); }
 bool load(ShockReading &r) { return retrieve(shock, r); }
 bool load(TippedReading &r) { return retrieve(tipped, r); }
 
+bool fill(const GeospatialReading &r) { return diskFill(geospatial); }
 bool fill(const HumidityReading &r) { return diskFill(humidity); }
 bool fill(const TemperatureReading &r) { return diskFill(temperature); }
 bool fill(const LightReading &r) { return diskFill(light); }

@@ -12,12 +12,14 @@ constexpr float SHOCK_THRESHOLD_G = 2.0f;
 constexpr float TIPPED_DEGREES = 45.0f;
 constexpr int TILT_SAMPLES = 50;
 
-constexpr unsigned long TEMPERATURE_RATE_MS = 600000;
+constexpr unsigned long TEMPERATURE_RATE_MS = 60000;
 
 constexpr unsigned long HUMIDITY_RATE_MS = 60000;
 
 constexpr unsigned long COVER_RATE_MS = 1000;
 constexpr unsigned long COVER_DISTANCE_CM = 3;
+
+constexpr unsigned long GEOSPATIAL_RATE_MS = 500;
 
 bool humidityNTemperatureEnabled;
 bool accelerationEnabled;
@@ -26,6 +28,7 @@ bool proximityEnabled;
 bool geospatialEnabled;
 bool bluetoothEnabled;
 
+Event<4, GeospatialReading &> onReadGPS;
 Event<4, LightReading &> onReadLight;
 Event<4, HumidityReading &> onReadHumidity;
 Event<4, TemperatureReading &> onReadTemperature;
@@ -161,7 +164,7 @@ void readCovered() {
   if (!due(last, COVER_RATE_MS))
     return;
 
-  unsigned int cm = ComponentRegistry::distanceSensor.readDistanceCM();
+  unsigned int cm = ComponentRegistry::distanceSensor.ping_cm();
   bool hasCovered = cm > COVER_DISTANCE_CM;
 
   static bool wasCovered = hasCovered;
@@ -172,6 +175,25 @@ void readCovered() {
   }
 
   wasCovered = hasCovered;
+}
+
+void readGeospatial() {
+  if (!geospatialEnabled)
+    return;
+
+  static unsigned long last = 0;
+  if (!due(last, GEOSPATIAL_RATE_MS))
+    return;
+
+  double longitude;
+  double latitude;
+  if (!ComponentRegistry::gps.getCoords(latitude, longitude)) {
+    Serial.println("failed");
+    return;
+  }
+
+  GeospatialReading geostpatialR(time(nullptr), latitude, longitude);
+  onReadGPS.emit(geostpatialR);
 }
 
 } // namespace SensorProcesses
@@ -188,6 +210,7 @@ void SensorProcesses::init(bool enableHumidityNTemperature,
 }
 
 void SensorProcesses::update() {
+  SensorProcesses::readGeospatial();
   SensorProcesses::readLight();
   SensorProcesses::readAcceleration();
   SensorProcesses::readHumidity();

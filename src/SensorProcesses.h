@@ -1,6 +1,7 @@
 #pragma once
 #include "Event.h"
 #include "storage/containers/CoverReading.h"
+#include "storage/containers/GeospatialReading.h"
 #include "storage/containers/HumidityReading.h"
 #include "storage/containers/LightReading.h"
 #include "storage/containers/ShockReading.h"
@@ -9,6 +10,7 @@
 
 namespace SensorProcesses {
 
+extern Event<4, GeospatialReading &> onReadGPS;
 extern Event<4, LightReading &> onReadLight;
 extern Event<4, HumidityReading &> onReadHumidity;
 extern Event<4, TemperatureReading &> onReadTemperature;

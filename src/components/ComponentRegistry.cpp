@@ -8,11 +8,7 @@ namespace ComponentRegistry {
 
 DHT tempHumSensor(D1, DHT11);
 
-InPin sclPin(D2), sdaPin(D5);
-DistanceSensor distanceSensor(sclPin, sdaPin);
-
-InPullupPin btnPin(D3);
-Button btn(btnPin);
+NewPing distanceSensor(D4, D7);
 
 InPin muxZ(A0);
 OutPin muxS0(D2), muxS1(D3);
@@ -26,12 +22,15 @@ LDR ldr(ldrPin, 330, true);
 
 SoftwareSerial bluetooth(4, 5);
 
+InPin geoTX(D5);
+InPin geoRX(D6);
+GPS gps(geoRX, geoTX);
+
 void initializeComponents() {
   bluetooth.begin(9600);
+  gps.init(9600);
   tempHumSensor.begin();
   accelerometer.init();
-  btn.init();
-  distanceSensor.init();
 }
 
 } // namespace ComponentRegistry
