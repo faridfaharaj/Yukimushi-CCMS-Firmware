@@ -18,7 +18,7 @@ void setup() {
         "ERROR: Failed to mount LittleFS, Disk storage will be unavailable!");
   }
 
-  JsonDocument doc = Config::load();
+  JsonDocument doc = Configuration::load();
 
   if (doc.isNull()) {
     Serial.println("Config failed, halting");
@@ -53,13 +53,13 @@ void setup() {
   bool bluetoothEnabled = doc["components"]["bluetooth"]["enable"] | true;
 
   // init
+  ComponentRegistry::initializeComponents();
+
   CommsManager::wifiInit(WIFI_SSID, WIFI_PASSWORD);
   CommsManager::mqttInit(mqttServer, port, topicSub);
   CommsManager::httpInit(httpServer);
   CommsManager::setApiKey(key);
   CommsManager::ntpInit();
-
-  ComponentRegistry::initializeComponents();
 
   SensorProcesses::init(humidityNTemperatureEnabled, accelerationEnabled,
                         lightEnabled, proximityEnabled, geospatialEnabled);

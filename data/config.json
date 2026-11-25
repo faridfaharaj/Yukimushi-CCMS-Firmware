@@ -31,9 +31,6 @@
     },
     "geospatial": {
       "enable": true
-    },
-    "bluetooth": {
-      "enable": true
     }
   }
 }

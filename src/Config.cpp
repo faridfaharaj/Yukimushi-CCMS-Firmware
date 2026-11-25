@@ -1,7 +1,7 @@
 #include "Config.h"
 #include <LittleFS.h>
 
-JsonDocument Config::load() {
+JsonDocument Configuration::load() {
   JsonDocument doc;
 
   File file = LittleFS.open("/config.json", "r");

@@ -24,21 +24,34 @@ template <typename T> bool publishReadingBase(T &reading, const char *topic) {
 }
 
 bool publishReading(HumidityReading &reading) {
+  CommsManager::bluetoothSend("{\"type\":\"humidity\",\"value\":", reading.getHumidityPercentage(), "}\n");
+
   return publishReadingBase(reading, channelTopicHumidity);
 }
 bool publishReading(TemperatureReading &reading) {
+  CommsManager::bluetoothSend("{\"type\":\"temperature\",\"value\":", reading.getDegrees(), "}\n");
+
   return publishReadingBase(reading, channelTopicTemperature);
 }
 bool publishReading(LightReading &reading) {
+  CommsManager::bluetoothSend("{\"type\":\"light\",\"value\":", reading.getLux(), "}\n");
+
   return publishReadingBase(reading, channelTopicLight);
 }
 bool publishReading(CoverReading &reading) {
+  if (reading.getOpen())
+    CommsManager::bluetoothSend("{\"type\":\"cover\",\"open\":true}\n");
+
   return publishReadingBase(reading, channelTopicCover);
 }
 bool publishReading(ShockReading &reading) {
+  CommsManager::bluetoothSend("{\"type\":\"shock\"}\n");
+
   return publishReadingBase(reading, channelTopicShock);
 }
 bool publishReading(TippedReading &reading) {
+  CommsManager::bluetoothSend("{\"type\":\"tipped\"}\n");
+
   return publishReadingBase(reading, channelTopicTipped);
 }
 

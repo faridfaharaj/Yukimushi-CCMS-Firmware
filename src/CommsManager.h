@@ -1,5 +1,6 @@
 #pragma once
 #include "Event.h"
+#include "components/ComponentRegistry.h"
 #include <ArduinoJson.h>
 #include <stdint.h>
 
@@ -18,6 +19,12 @@ bool mqttConnected();
 
 bool getApi(const char *path, JsonDocument &doc);
 bool mqttPublish(const char *topic, const uint8_t *payload, size_t size);
+
+template <typename... Args> void bluetoothSend(Args &&...args) {
+  (ComponentRegistry::bluetooth.print(std::forward<Args>(args)), ...);
+
+  ComponentRegistry::bluetooth.println();
+}
 
 bool timeInit();
 
