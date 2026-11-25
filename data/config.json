@@ -6,7 +6,31 @@
   "mqtt": {
     "server": "broker.hivemq.com",
     "port": 1883,
-    "topic_sub": "RiSa/LEDrgb2007",
-    "topic_pub": "RiSa/SensorA02007"
+    "topic_sub": "yukimushi/device-cmd",
+    "topic_readings": {
+      "cover": "yukimushi/readings/{device}/cover",
+      "humidity": "yukimushi/readings/{device}/humidity",
+      "light": "yukimushi/readings/{device}/light",
+      "shock": "yukimushi/readings/{device}/shock",
+      "temperature": "yukimushi/readings/{device}/temperature",
+      "tipped": "yukimushi/readings/{device}/tipped"
+    }
+  },
+  "components": {
+    "humidityNTemperature": {
+      "enable": true
+    },
+    "acceleration": {
+      "enable": true
+    },
+    "light": {
+      "enable": true
+    },
+    "proximity": {
+      "enable": true
+    },
+    "geospatial": {
+      "enable": true
+    }
   }
 }

@@ -1,25 +1,26 @@
 #pragma once
 #include "Event.h"
+#include "storage/containers/CoverReading.h"
+#include "storage/containers/HumidityReading.h"
+#include "storage/containers/LightReading.h"
+#include "storage/containers/ShockReading.h"
+#include "storage/containers/TemperatureReading.h"
+#include "storage/containers/TippedReading.h"
 
 namespace SensorProcesses {
 
-extern Event<4, double> onReadLight;
-extern Event<4, float> onReadHumidity;
-extern Event<4, float> onReadTemperature;
+extern Event<4, LightReading &> onReadLight;
+extern Event<4, HumidityReading &> onReadHumidity;
+extern Event<4, TemperatureReading &> onReadTemperature;
 
-extern Event<4, float> onTipped;
-extern Event<4> onShockDetected;
-extern Event<4, bool> onCoverChanged;
+extern Event<4, TippedReading &> onTipped;
+extern Event<4, ShockReading &> onShock;
+extern Event<4, CoverReading &> onCoverChanged;
 
 void readbtn(unsigned long time);
 
-void init();
-
-void readLight();
-void readAcceleration();
-void readTemperature();
-void readHumidity();
-void readCovered();
+void init(bool enableHumidityNTemperature, bool enableAcceleration,
+          bool enableLight, bool enableProximity, bool enableGeospatial);
 
 void update();
 

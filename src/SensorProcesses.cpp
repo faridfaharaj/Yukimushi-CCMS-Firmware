@@ -4,41 +4,56 @@
 #include <cmath>
 
 namespace SensorProcesses {
-Event<4, double> onReadLight;
-Event<4, float> onReadHumidity;
-Event<4, float> onReadTemperature;
-
-Event<4, float> onTipped;
-// NOTE: shock GY-61 can only read up to 3g so shock magnitude cannot really be
-// measured unless we have a better sensor
-Event<4> onShockDetected;
-Event<4, bool> onCoverChanged;
 
 constexpr unsigned long LIGHT_RATE_MS = 60000;
-
 constexpr unsigned long ACCELERATION_RATE_MS = 20;
-constexpr unsigned long SHOCK_COOLDOWN_MS = 500;
+constexpr unsigned long SHOCK_COOLDOWN_MS = 1000;
 constexpr float SHOCK_THRESHOLD_G = 2.0f;
 constexpr float TIPPED_DEGREES = 45.0f;
 constexpr int TILT_SAMPLES = 50;
 
 constexpr unsigned long TEMPERATURE_RATE_MS = 600000;
 
-constexpr unsigned long HUMIDITY_RATE_MS = 600000;
+constexpr unsigned long HUMIDITY_RATE_MS = 60000;
 
 constexpr unsigned long COVER_RATE_MS = 1000;
 constexpr unsigned long COVER_DISTANCE_CM = 3;
 
+bool humidityNTemperatureEnabled;
+bool accelerationEnabled;
+bool lightEnabled;
+bool proximityEnabled;
+bool geospatialEnabled;
+bool bluetoothEnabled;
+
+Event<4, LightReading &> onReadLight;
+Event<4, HumidityReading &> onReadHumidity;
+Event<4, TemperatureReading &> onReadTemperature;
+
+Event<4, TippedReading &> onTipped;
+// NOTE: shock GY-61 can only read up to 3g so shock magnitude cannot really be
+// measured unless we have a better sensor
+Event<4, ShockReading &> onShock;
+Event<4, CoverReading &> onCoverChanged;
+
 void readLight() {
+  if (!lightEnabled)
+    return;
+
   static unsigned long last = 0;
   if (!due(last, LIGHT_RATE_MS))
     return;
 
-  double lux = ComponentRegistry::ldr.readLux();
-  onReadLight.emit(lux);
+  float lux = ComponentRegistry::ldr.readLux();
+
+  LightReading lightR(time(nullptr), lux);
+  onReadLight.emit(lightR);
 }
 
 void readAcceleration() {
+  if (!accelerationEnabled)
+    return;
+
   static unsigned long last = 0;
   if (!due(last, ACCELERATION_RATE_MS))
     return;
@@ -53,7 +68,9 @@ void readAcceleration() {
   if (mag2 >= SHOCK_THRESHOLD_G * SHOCK_THRESHOLD_G &&
       cooldownDue(shockCooldown, SHOCK_COOLDOWN_MS)) {
     shockCooldown = millis();
-    onShockDetected.emit();
+
+    ShockReading shockR(time(nullptr));
+    onShock.emit(shockR);
   }
 
   // Tilt
@@ -70,8 +87,9 @@ void readAcceleration() {
   sx += accX;
   sy += accY;
   sz += accZ;
-  if (++n < TILT_SAMPLES)
-    return;
+
+  return;
+
   float ax = sx / n, ay = sy / n, az = sz / n;
   sx = sy = sz = 0;
   n = 0;
@@ -80,6 +98,7 @@ void readAcceleration() {
 
   static float baseX, baseY, baseZ;
   static bool haveBase = false;
+
   if (!haveBase) {
     baseX = ax;
     baseY = ay;
@@ -95,54 +114,77 @@ void readAcceleration() {
 
   static bool wasTipped = false;
   bool hasTipped = change > TIPPED_DEGREES;
+
   if (wasTipped != hasTipped) {
     wasTipped = hasTipped;
+
     if (hasTipped) {
-      onTipped.emit(change);
+      TippedReading tippedR(time(nullptr));
+      onTipped.emit(tippedR);
     }
   }
 }
 
 void readTemperature() {
+  if (!humidityNTemperatureEnabled)
+    return;
+
   static unsigned long last = 0;
   if (!due(last, TEMPERATURE_RATE_MS))
     return;
 
   float degrees = ComponentRegistry::tempHumSensor.readTemperature();
-  onReadTemperature.emit(degrees);
+
+  TemperatureReading temperatureR(time(nullptr), degrees);
+  onReadTemperature.emit(temperatureR);
 }
 
 void readHumidity() {
+  if (!humidityNTemperatureEnabled)
+    return;
+
   static unsigned long last = 0;
   if (!due(last, HUMIDITY_RATE_MS))
     return;
 
   float humidity = ComponentRegistry::tempHumSensor.readHumidity();
-  onReadHumidity.emit(humidity);
+
+  HumidityReading humidityR(time(nullptr), humidity);
+  onReadHumidity.emit(humidityR);
 }
 
 void readCovered() {
+  if (!proximityEnabled)
+    return;
+
   static unsigned long last = 0;
   if (!due(last, COVER_RATE_MS))
     return;
 
   unsigned int cm = ComponentRegistry::distanceSensor.readDistanceCM();
   bool hasCovered = cm > COVER_DISTANCE_CM;
+
   static bool wasCovered = hasCovered;
+
   if (wasCovered != hasCovered) {
-    onCoverChanged.emit(cm > COVER_DISTANCE_CM);
+    CoverReading coverR(time(nullptr), hasCovered);
+    onCoverChanged.emit(coverR);
   }
+
   wasCovered = hasCovered;
 }
 
 } // namespace SensorProcesses
 
-void SensorProcesses::readbtn(unsigned long time) {
-  Serial.println("ButtonPressed! for: " + String(time) + "ms");
-}
+void SensorProcesses::init(bool enableHumidityNTemperature,
+                           bool enableAcceleration, bool enableLight,
+                           bool enableProximity, bool enableGeospatial) {
 
-void SensorProcesses::init() {
-  ComponentRegistry::btn.onRelease.subscribe(readbtn);
+  humidityNTemperatureEnabled = enableHumidityNTemperature;
+  accelerationEnabled = enableAcceleration;
+  lightEnabled = enableLight;
+  proximityEnabled = enableProximity;
+  geospatialEnabled = enableGeospatial;
 }
 
 void SensorProcesses::update() {

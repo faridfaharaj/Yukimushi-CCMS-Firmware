@@ -1,6 +1,6 @@
 #pragma once
 #include <ArduinoJson.h>
 
-namespace Config {
+namespace Configuration {
 JsonDocument load();
 }

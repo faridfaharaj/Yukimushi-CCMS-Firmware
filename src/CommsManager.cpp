@@ -1,11 +1,12 @@
 #include "CommsManager.h"
-
+#include "core_esp8266_features.h"
 #include <Arduino.h>
 #include <ESP8266HTTPClient.h>
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
+#include <SoftwareSerial.h>
 
-namespace {
+namespace CommsManager {
 
 WiFiClient mqttWifiClient{};
 PubSubClient mqttClient{mqttWifiClient};
@@ -15,14 +16,18 @@ HTTPClient httpClient{};
 
 const char *mqttServer = nullptr;
 const char *channelTopicSub = nullptr;
-const char *channelTopicPub = nullptr;
 char clientId[24];
 
 const char *serverName = nullptr;
 const char *apiKey = nullptr;
 
+WiFiEventHandler onWifiConnected;
+WiFiEventHandler onWifiDisconnected;
+
+Event<1> onMQTTconnected;
+
 // only for debugging, delete later maybe?
-bool hadWIFI = false, hadMQTT = false;
+bool hadMQTT = false;
 
 void callback(char *topic, byte *payload, unsigned int length) {
   char cstring[64];
@@ -33,13 +38,28 @@ void callback(char *topic, byte *payload, unsigned int length) {
   // do stuff
 }
 
-} // namespace
+bool mqttConnect() {
+  static unsigned long lastTry = millis() - 5000;
+  if (millis() - lastTry < 5000)
+    return false;
+  lastTry = millis();
+
+  mqttWifiClient.stop();
+  if (!mqttClient.connect(clientId))
+    return false;
+  mqttClient.subscribe(channelTopicSub);
+  onMQTTconnected.emit();
+  return true;
+}
+
+} // namespace CommsManager
 
 void CommsManager::wifiInit(const char *WIFI_SSID, const char *WIFI_PASSWORD) {
+
   uint8_t mac[6];
   WiFi.macAddress(mac);
-  snprintf(clientId, sizeof(clientId), "%s-%02X%02X%02X%02X%02X%02X", "Client",
-           mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+  snprintf(clientId, sizeof(clientId), "%02X%02X%02X%02X%02X%02X", mac[0],
+           mac[1], mac[2], mac[3], mac[4], mac[5]);
 
   delay(100);
   Serial.println();
@@ -70,18 +90,25 @@ void CommsManager::wifiInit(const char *WIFI_SSID, const char *WIFI_PASSWORD) {
 
     timeOutTimer--;
   }
-  hadWIFI = true;
   Serial.println();
   Serial.println("WiFi connnected!");
   Serial.print("IP address: ");
   Serial.println(WiFi.localIP());
+
+  onWifiConnected =
+      WiFi.onStationModeGotIP([](const WiFiEventStationModeGotIP &) {
+        Serial.println("wifi Connected!");
+      });
+  onWifiDisconnected = WiFi.onStationModeDisconnected(
+      [](const WiFiEventStationModeDisconnected &) {
+        Serial.println("Wifi Connection lost, Reconnecting...");
+      });
 }
 
-void CommsManager::mqttInit(const char *server, uint16_t port, const char *sub,
-                            const char *pub) {
+void CommsManager::mqttInit(const char *server, uint16_t port,
+                            const char *sub) {
   mqttServer = strdup(server);
   channelTopicSub = strdup(sub);
-  channelTopicPub = strdup(pub);
 
   mqttClient.setServer(mqttServer, port);
   mqttClient.setCallback(callback);
@@ -104,34 +131,13 @@ void CommsManager::httpInit(const char *serverURL) {
   serverName = strdup(serverURL);
 }
 
+void CommsManager::ntpInit() { configTime(0, 0, "pool.ntp.org"); }
+
 void CommsManager::setApiKey(const char *key) { apiKey = strdup(key); }
 
-bool CommsManager::mqttConnect() {
-  static unsigned long lastTry = millis() - 5000;
-  if (millis() - lastTry < 5000)
-    return false;
-  lastTry = millis();
-
-  mqttWifiClient.stop();
-  if (!mqttClient.connect(clientId))
-    return false;
-  mqttClient.subscribe(channelTopicSub);
-  return true;
-}
-
 void CommsManager::update() {
-  bool hasWifi = wifiConnected();
-  if (hadWIFI != hasWifi) {
-    if (hasWifi) {
-      Serial.println("wifi Connected!");
-    } else {
-      Serial.println("Wifi Connection lost!");
-    }
-    hadWIFI = hasWifi;
-  }
-
-  bool hasMQTT = mqttClient.connected();
-  if (!hasMQTT && hasWifi) {
+  bool hasMQTT = CommsManager::mqttConnected();
+  if (!hasMQTT && wifiConnected()) {
     hasMQTT = mqttConnect();
   }
   if (hasMQTT != hadMQTT) {
@@ -147,6 +153,7 @@ void CommsManager::update() {
 }
 
 bool CommsManager::wifiConnected() { return WiFi.status() == WL_CONNECTED; }
+bool CommsManager::mqttConnected() { return mqttClient.connected(); }
 
 bool CommsManager::getApi(const char *path, JsonDocument &doc) {
   String url = String(serverName) + path;
@@ -178,35 +185,7 @@ bool CommsManager::getApi(const char *path, JsonDocument &doc) {
   return ok;
 }
 
-void CommsManager::mqttPublish(const char *payload) {
-  char msg[64];
-
-  int n = snprintf(msg, sizeof(msg), "%s: %s", clientId, payload);
-  if (n < 0 || n >= (int)sizeof(msg)) {
-    Serial.println("Message " + String(payload) +
-                   " exeeds size limit: " + sizeof(msg));
-    return;
-  }
-
-  if (!mqttClient.publish(channelTopicPub, msg)) {
-    Serial.println("Failed to publish: " + String(payload));
-  }
-}
-
-void CommsManager::solicitarHoraServidor() {
-  JsonDocument doc;
-
-  if (!getApi("/api/datetime", doc)) {
-    return;
-  }
-
-  String fechaServidor = doc["date"].as<String>();
-  int diaDeLaSemana = doc["dayNumber"].as<int>();
-  String horaServidor = doc["time"].as<String>();
-
-  Serial.println("\n--- [OPERACIÓN HORA REALIZADA] ---");
-  Serial.printf("Fecha del Servidor: %s\n", fechaServidor.c_str());
-  Serial.printf("Número de Día:      %d\n", diaDeLaSemana);
-  Serial.printf("Hora del Servidor:  %s\n", horaServidor.c_str());
-  Serial.println("-----------------------------------\n");
+bool CommsManager::mqttPublish(const char *topic, const uint8_t *payload,
+                               size_t len) {
+  return mqttClient.publish(topic, payload, len);
 }

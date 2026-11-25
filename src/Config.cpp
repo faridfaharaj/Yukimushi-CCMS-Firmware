@@ -1,13 +1,8 @@
 #include "Config.h"
 #include <LittleFS.h>
 
-JsonDocument Config::load() {
+JsonDocument Configuration::load() {
   JsonDocument doc;
-
-  if (!LittleFS.begin()) {
-    Serial.println("ERROR: Failed to mount LittleFS");
-    return doc;
-  }
 
   File file = LittleFS.open("/config.json", "r");
 
