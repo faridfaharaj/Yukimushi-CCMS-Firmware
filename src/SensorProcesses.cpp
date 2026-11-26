@@ -183,11 +183,8 @@ void readGeospatial() {
 
   double longitude;
   double latitude;
-  if (!ComponentRegistry::gps.getCoords(latitude, longitude)) {
-    Serial.println("failed");
+  if (!ComponentRegistry::gps.getCoords(latitude, longitude))
     return;
-  }
-  Serial.println("got");
 
   static unsigned long last = 0;
   if (!due(last, GEOSPATIAL_RATE_MS))
