@@ -20,14 +20,13 @@ Accelerometer accelerometer(accX, accY, accZ);
 PlexedInPin ldrPin(multiplexer, 3);
 LDR ldr(ldrPin, 330, true);
 
-SoftwareSerial bluetooth(4, 5);
+SoftwareSerial bluetooth(D0, D8);
 
-InPin geoTX(D5);
-InPin geoRX(D6);
+UninitializedPin geoTX(D5);
+UninitializedPin geoRX(D6);
 GPS gps(geoRX, geoTX);
 
 void initializeComponents() {
-  bluetooth.begin(9600);
   gps.init(9600);
   tempHumSensor.begin();
   accelerometer.init();

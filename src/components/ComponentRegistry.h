@@ -3,7 +3,6 @@
 #include "custom/Accelerometer.h"
 #include "custom/GPS.h"
 #include "custom/LDR.h"
-#include "custom/Button.h"
 #include "custom/DistanceSensor.h"
 #include "custom/Multiplexer.h"
 #include <Arduino.h>
