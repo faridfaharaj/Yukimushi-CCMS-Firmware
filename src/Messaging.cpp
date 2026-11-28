@@ -2,64 +2,62 @@
 #include "CommsManager.h"
 #include "SensorProcesses.h"
 #include "storage/InMemoryStorage.h"
+#include "util.h"
 #include <ESP8266WiFi.h>
+#include <LittleFS.h>
+#include <cstdio>
 
 namespace Messaging {
 
-const char *channelTopicGeospatial = nullptr;
-const char *channelTopicCover = nullptr;
-const char *channelTopicHumidity = nullptr;
-const char *channelTopicLight = nullptr;
-const char *channelTopicShock = nullptr;
-const char *channelTopicTemperature = nullptr;
-const char *channelTopicTipped = nullptr;
+constexpr unsigned long STATUS_UPDATE_RATE_MS = 60000;
 
 WiFiEventHandler onConnected;
 
-template <typename T> bool publishReadingBase(T &reading, const char *topic) {
+template <typename T> bool publishReadingBase(T &reading) {
   uint8_t buffer[reading.size()];
   size_t n = reading.serialize(buffer);
 
   return CommsManager::wifiConnected() && CommsManager::mqttConnected() &&
-         CommsManager::mqttPublish(topic, buffer, n);
+         CommsManager::mqttPublish(
+             CommsManager::getTopic(MqttTopicMessageType::NDATA), buffer, n);
 }
 
 bool publishReading(HumidityReading &reading) {
   CommsManager::bluetoothSend("{\"type\":\"humidity\",\"value\":",
                               reading.getHumidityPercentage(), "}\n");
 
-  return publishReadingBase(reading, channelTopicHumidity);
+  return publishReadingBase(reading);
 }
 bool publishReading(TemperatureReading &reading) {
   CommsManager::bluetoothSend(
       "{\"type\":\"temperature\",\"value\":", reading.getDegrees(), "}\n");
 
-  return publishReadingBase(reading, channelTopicTemperature);
+  return publishReadingBase(reading);
 }
 bool publishReading(LightReading &reading) {
   CommsManager::bluetoothSend(
       "{\"type\":\"light\",\"value\":", reading.getLux(), "}\n");
 
-  return publishReadingBase(reading, channelTopicLight);
+  return publishReadingBase(reading);
 }
 bool publishReading(CoverReading &reading) {
   if (reading.getOpen())
     CommsManager::bluetoothSend("{\"type\":\"cover\",\"open\":true}\n");
 
-  return publishReadingBase(reading, channelTopicCover);
+  return publishReadingBase(reading);
 }
 bool publishReading(ShockReading &reading) {
   CommsManager::bluetoothSend("{\"type\":\"shock\"}\n");
 
-  return publishReadingBase(reading, channelTopicShock);
+  return publishReadingBase(reading);
 }
 bool publishReading(TippedReading &reading) {
   CommsManager::bluetoothSend("{\"type\":\"tipped\"}\n");
 
-  return publishReadingBase(reading, channelTopicTipped);
+  return publishReadingBase(reading);
 }
 bool publishReading(GeospatialReading &reading) {
-  return publishReadingBase(reading, channelTopicGeospatial);
+  return publishReadingBase(reading);
 }
 
 template <typename T> void processReading(T &reading) {
@@ -81,6 +79,12 @@ template <typename T> void publishStored() {
   } while (InMemoryStorage::fill(reading));
 }
 
+void sendStatusUpdate(DeviceState state) {
+  uint8_t payload = static_cast<uint8_t>(state);
+  CommsManager::mqttPublish(CommsManager::getTopic(MqttTopicMessageType::DDATA),
+                            &payload, sizeof(payload));
+}
+
 } // namespace Messaging
 
 void Messaging::publishStorage() {
@@ -93,48 +97,7 @@ void Messaging::publishStorage() {
   publishStored<TippedReading>();
 }
 
-void fillTopic(const char *tmpl, const char *device, const char *&outChar) {
-  const char *token = "{device}";
-  const char *hit = strstr(tmpl, token);
-
-  size_t len = strlen(tmpl);
-  if (hit)
-    len = len - strlen(token) + strlen(device);
-
-  char *out = (char *)malloc(len + 1);
-  if (!out) {
-    outChar = nullptr;
-    return;
-  }
-
-  if (!hit) {
-    strcpy(out, tmpl);
-  } else {
-    size_t prefix = hit - tmpl;
-    memcpy(out, tmpl, prefix);
-    strcpy(out + prefix, device);
-    strcpy(out + prefix + strlen(device), hit + strlen(token));
-  }
-
-  outChar = out;
-}
-
-void Messaging::init(const char *topicCover, const char *topicHumidity,
-                     const char *topicLight, const char *topicShock,
-                     const char *topicTemperature, const char *topicTipped,
-                     const char *topicGeospatial) {
-
-  String addr = WiFi.macAddress();
-  addr.replace(":", "");
-  const char *charMac = addr.c_str();
-
-  fillTopic(topicGeospatial, charMac, channelTopicCover);
-  fillTopic(topicCover, charMac, channelTopicCover);
-  fillTopic(topicHumidity, charMac, channelTopicHumidity);
-  fillTopic(topicLight, charMac, channelTopicLight);
-  fillTopic(topicShock, charMac, channelTopicShock);
-  fillTopic(topicTemperature, charMac, channelTopicTemperature);
-  fillTopic(topicTipped, charMac, channelTopicTipped);
+void Messaging::init() {
 
   CommsManager::onMQTTconnected.subscribe(publishStorage);
   SensorProcesses::onReadGPS.subscribe(processReading<GeospatialReading>);
@@ -146,4 +109,12 @@ void Messaging::init(const char *topicCover, const char *topicHumidity,
   SensorProcesses::onCoverChanged.subscribe(processReading<CoverReading>);
   SensorProcesses::onShock.subscribe(processReading<ShockReading>);
   SensorProcesses::onTipped.subscribe(processReading<TippedReading>);
+}
+
+void Messaging::update() {
+
+  static unsigned long last = 0;
+  if (due(last, STATUS_UPDATE_RATE_MS)) {
+    sendStatusUpdate(DeviceState::ONLINE);
+  }
 }

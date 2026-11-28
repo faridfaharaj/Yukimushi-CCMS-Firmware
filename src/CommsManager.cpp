@@ -1,25 +1,27 @@
 #include "CommsManager.h"
+#include "HardwareSerial.h"
 #include "core_esp8266_features.h"
+#include "util.h"
 #include <Arduino.h>
 #include <ESP8266HTTPClient.h>
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
 #include <SoftwareSerial.h>
+#include <WiFiClientSecure.h>
 
 namespace CommsManager {
 
-WiFiClient mqttWifiClient{};
-PubSubClient mqttClient{mqttWifiClient};
+BearSSL::WiFiClientSecure mqttWifiSecure;
+PubSubClient mqttClient(mqttWifiSecure);
+BearSSL::X509List *caCert;
+BearSSL::X509List *clientCert;
+BearSSL::PrivateKey *clientKey;
 
-WiFiClient httpWifiClient{};
-HTTPClient httpClient{};
+constexpr size_t TOPIC_MAX_LENGTH = 95;
 
 const char *mqttServer = nullptr;
-const char *channelTopicSub = nullptr;
 char clientId[24];
-
-const char *serverName = nullptr;
-const char *apiKey = nullptr;
+const char *channelTopicTemplate = nullptr;
 
 WiFiEventHandler onWifiConnected;
 WiFiEventHandler onWifiDisconnected;
@@ -44,22 +46,64 @@ bool mqttConnect() {
     return false;
   lastTry = millis();
 
-  mqttWifiClient.stop();
-  if (!mqttClient.connect(clientId))
+  if (time(nullptr) < 1700000000)
     return false;
-  mqttClient.subscribe(channelTopicSub);
+
+  Serial.println("Trying to connect mqtt...");
+
+  mqttWifiSecure.stop();
+  if (!mqttClient.connect(clientId)) {
+    char err[128];
+    int code = mqttWifiSecure.getLastSSLError(err, sizeof(err));
+    Serial.printf("ssl code=%d msg=%s\n", code, err);
+    return false;
+  }
+
+  mqttClient.subscribe(getTopic(MqttTopicMessageType::NCMD));
   onMQTTconnected.emit();
+  return true;
+}
+
+bool getTopicTemplate(const char *org, const char *node, const char *&outChar) {
+
+  static char topic[TOPIC_MAX_LENGTH + 1];
+  int n = snprintf(topic, sizeof(topic), "yukimushi/%s/%s/%s", org, "%s", node);
+
+  if (n < 0 || n > TOPIC_MAX_LENGTH) {
+    outChar = nullptr;
+    return false;
+  }
+
+  outChar = topic;
   return true;
 }
 
 } // namespace CommsManager
 
+const char *CommsManager::getTopic(MqttTopicMessageType type) {
+  static char topic[TOPIC_MAX_LENGTH + 1];
+
+  if (!channelTopicTemplate)
+    return nullptr;
+
+  int n = snprintf(topic, sizeof(topic), channelTopicTemplate, toString(type));
+  if (n < 0 || n > TOPIC_MAX_LENGTH) {
+    return nullptr;
+  };
+
+  return topic;
+}
+
 void CommsManager::wifiInit(const char *WIFI_SSID, const char *WIFI_PASSWORD) {
 
-  uint8_t mac[6];
-  WiFi.macAddress(mac);
-  snprintf(clientId, sizeof(clientId), "%02X%02X%02X%02X%02X%02X", mac[0],
-           mac[1], mac[2], mac[3], mac[4], mac[5]);
+  onWifiConnected =
+      WiFi.onStationModeGotIP([](const WiFiEventStationModeGotIP &) {
+        Serial.println("wifi Connected!");
+      });
+  onWifiDisconnected = WiFi.onStationModeDisconnected(
+      [](const WiFiEventStationModeDisconnected &) {
+        Serial.println("Wifi Connection lost, Reconnecting...");
+      });
 
   delay(100);
   Serial.println();
@@ -84,7 +128,6 @@ void CommsManager::wifiInit(const char *WIFI_SSID, const char *WIFI_PASSWORD) {
     Serial.print(".");
 
     if (timeOutTimer % 4 == 0) {
-      timeOutTimer = timeOutTimer < 0 ? 0 : timeOutTimer;
       Serial.print("\b\b\b\b    \b\b\b\b");
     }
 
@@ -94,46 +137,43 @@ void CommsManager::wifiInit(const char *WIFI_SSID, const char *WIFI_PASSWORD) {
   Serial.println("WiFi connnected!");
   Serial.print("IP address: ");
   Serial.println(WiFi.localIP());
-
-  onWifiConnected =
-      WiFi.onStationModeGotIP([](const WiFiEventStationModeGotIP &) {
-        Serial.println("wifi Connected!");
-      });
-  onWifiDisconnected = WiFi.onStationModeDisconnected(
-      [](const WiFiEventStationModeDisconnected &) {
-        Serial.println("Wifi Connection lost, Reconnecting...");
-      });
 }
 
 void CommsManager::mqttInit(const char *server, uint16_t port,
-                            const char *sub) {
+                            const char *org) {
   mqttServer = strdup(server);
-  channelTopicSub = strdup(sub);
+
+  uint8_t mac[6];
+  WiFi.macAddress(mac);
+  snprintf(clientId, sizeof(clientId), "%02X%02X%02X%02X%02X%02X", mac[0],
+           mac[1], mac[2], mac[3], mac[4], mac[5]);
+
+  {
+    String s = readFile("/ca.crt");
+    caCert = new BearSSL::X509List(s.c_str());
+  }
+  {
+    String s = readFile("/client.crt");
+    clientCert = new BearSSL::X509List(s.c_str());
+  }
+  {
+    String s = readFile("/client.key");
+    clientKey = new BearSSL::PrivateKey(s.c_str());
+  }
+
+  mqttWifiSecure.setTrustAnchors(caCert);
+  mqttWifiSecure.setClientECCert(clientCert, clientKey, BR_KEYTYPE_SIGN, 0);
+  mqttWifiSecure.setBufferSizes(1024, 512);
+  mqttWifiSecure.setTimeout(10000);
+
+  getTopicTemplate(org, clientId, channelTopicTemplate);
 
   mqttClient.setServer(mqttServer, port);
   mqttClient.setCallback(callback);
-  mqttClient.setSocketTimeout(2);
-
-  if (!wifiConnected())
-    return;
-  Serial.println("Trying MQTT connection...");
-  if (mqttConnect()) {
-    Serial.println("Connected to MQTT broker!");
-    hadMQTT = true;
-  } else {
-    Serial.print("Connection Error, rc=");
-    Serial.println(mqttClient.state());
-  }
-}
-
-void CommsManager::httpInit(const char *serverURL) {
-  httpClient.setTimeout(2000);
-  serverName = strdup(serverURL);
+  mqttClient.setSocketTimeout(10);
 }
 
 void CommsManager::ntpInit() { configTime(0, 0, "pool.ntp.org"); }
-
-void CommsManager::setApiKey(const char *key) { apiKey = strdup(key); }
 
 void CommsManager::update() {
   bool hasMQTT = CommsManager::mqttConnected();
@@ -154,36 +194,6 @@ void CommsManager::update() {
 
 bool CommsManager::wifiConnected() { return WiFi.status() == WL_CONNECTED; }
 bool CommsManager::mqttConnected() { return mqttClient.connected(); }
-
-bool CommsManager::getApi(const char *path, JsonDocument &doc) {
-  String url = String(serverName) + path;
-
-  if (!httpClient.begin(httpWifiClient, url)) {
-    Serial.print("Couldn't establish connection with: ");
-    Serial.println(serverName);
-    return false;
-  }
-
-  httpClient.addHeader("x-api-key", apiKey);
-
-  int httpResponseCode = httpClient.GET();
-  bool ok = false;
-
-  if (httpResponseCode == 200) {
-    DeserializationError error = deserializeJson(doc, httpClient.getStream());
-    if (error) {
-      Serial.print("Couldn't process JSON response: ");
-      Serial.println(error.c_str());
-    } else {
-      ok = true;
-    }
-  } else {
-    Serial.printf("HTTP Error: %d\n", httpResponseCode);
-  }
-
-  httpClient.end();
-  return ok;
-}
 
 bool CommsManager::mqttPublish(const char *topic, const uint8_t *payload,
                                size_t len) {

@@ -4,18 +4,9 @@
     "password": "<WIFI_PASSWORD>"
   },
   "mqtt": {
-    "server": "broker.hivemq.com",
-    "port": 1883,
-    "topic_sub": "yukimushi/device-cmd",
-    "topic_readings": {
-      "cover": "yukimushi/readings/{device}/cover",
-      "humidity": "yukimushi/readings/{device}/humidity",
-      "light": "yukimushi/readings/{device}/light",
-      "shock": "yukimushi/readings/{device}/shock",
-      "temperature": "yukimushi/readings/{device}/temperature",
-      "tipped": "yukimushi/readings/{device}/tipped",
-      "geospatial": "yukimushi/readings/{device}/geospatial"
-    }
+    "server": "yukimushi.org",
+    "port": 8883,
+    "organization": "yukimushi"
   },
   "components": {
     "humidityNTemperature": {

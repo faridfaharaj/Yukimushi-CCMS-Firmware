@@ -3,13 +3,13 @@
 
 namespace InMemoryStorage {
 
-Queue<576, GeospatialReading> geospatial;
-Queue<576, HumidityReading> humidity;
-Queue<576, TemperatureReading> temperature;
-Queue<576, LightReading> light;
-Queue<576, CoverReading> cover;
-Queue<576, ShockReading> shock;
-Queue<576, TippedReading> tipped;
+Queue<50, GeospatialReading> geospatial;
+Queue<50, HumidityReading> humidity;
+Queue<50, TemperatureReading> temperature;
+Queue<50, LightReading> light;
+Queue<50, CoverReading> cover;
+Queue<50, ShockReading> shock;
+Queue<50, TippedReading> tipped;
 
 template <size_t N, typename T> void push(Queue<N, T> &q, const T &reading) {
   if (q.isFull() && !DiskStorage::write<N, T>(q))
